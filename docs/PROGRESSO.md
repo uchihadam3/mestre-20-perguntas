@@ -1,4 +1,4 @@
-# Progresso — primeiro marco
+# Progresso — Mestre das 20 Perguntas
 
 ## Segunda etapa em andamento (2026-10-14)
 
@@ -8,7 +8,8 @@
 - Interface: Lume, mentor original em SVG; HUD da investigação e feedback de resposta; arquivo pós-partida mostra até três pistas informativas segundo a base. Densidade da tela de jogo ajustada para alturas menores e rolagem lateral mascarada no contêiner principal removida.
 - Academia: quatro modos jogáveis (previsão, leitura, divisão e erro da IA), 8 conquistas, três métricas de memorização. A missão diária agora exige três pistas diferentes; repetir cedo a mesma pista não acelera revisão nem gera XP de novo no dia. Maestria exige revisões vencidas em dias futuros.
 - Revisão após publicação de teste: treino de leitura distingue dado ausente de resposta “Não”; divisão compara pares de candidatos e erro da IA alterna três situações. Os controles pequenos receberam alvo de toque de 44px. **17 testes** passaram nesta revisão.
-- Verificações locais: `validate:data`, `format:check`, `typecheck`, `lint`, `test` e `build` após esta etapa; conferir CI do commit. Testes de viewport, screenshots, acessibilidade em leitor de tela e instalação em aparelho real **pendentes** neste ambiente sem controle de navegador. A versão publicada anteriormente não contém ainda esta segunda etapa.
+- Verificações locais: `validate:data` (203 alvos, 57 perguntas, 0 problemas estruturais), `format:check`, `typecheck`, `lint`, `test` (17 aprovados), `build` e benchmark. [CI do segundo commit verde](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38592019414).
+- [Site público atualizado para a versão 4](https://mestre-20-perguntas.uchihadam.chatgpt.site), implantação `succeeded`; página e manifesto HTTP 200, service worker `mestre20-v5`. Testes de viewport, screenshots, acessibilidade em leitor de tela e instalação em aparelho real **pendentes** neste ambiente sem controle de navegador. Publicação é versão de teste, sem alegação de aprovação visual no celular.
 - A base tem **203 alvos e 57 perguntas**; seis alvos com fontes primárias no [lote de curadoria](CURADORIA_SEGUNDA_ETAPA.md). Curadoria individual do restante, calibração com respostas humanas, modo humano versus IA e árvore estável para memorização permanecem pendentes.
 
 ## Primeiro marco (registro histórico)
