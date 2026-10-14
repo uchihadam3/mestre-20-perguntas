@@ -14,10 +14,10 @@
 
 - `npm run validate:data`: 197 alvos, 42 perguntas, 0 problemas estruturais.
 - `npm test`: 9 testes passaram; incluem posterior, quatro respostas, rejeição de palpites, 20 ações e recompensas.
-- `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`: passaram localmente e no [CI remoto](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38532294652).
+- `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`: passaram localmente e no [CI remoto da correção de instalação](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38535917540).
 - `npm run benchmark`: 12 alvos determinísticos da seed, respostas perfeitas: fixo 8/12, média de 16,00 ações nas vitórias; adaptativo 12/12, média de 9,83. Nenhuma vitória em até 5 neste recorte. Esses números **não** são de pessoas jogando.
 - Teste visual em navegador, Playwright e medições em 320/360/375/390/430 px: **pendentes** porque este ambiente não disponibilizou controle de navegador. Não foram afirmados como aprovados.
-- Publicação do Site confirmada pelo serviço de hospedagem: versão 1, estado `succeeded`, URL acima. O arquivo de publicação contém `index.html`, manifesto, service worker e ícones 192/512.
+- Publicação do Site confirmada pelo serviço de hospedagem: versão 2, estado `succeeded`, URL acima. O arquivo de publicação contém `index.html`, manifesto, service worker e ícones 192/512.
 - O primeiro acesso restrito respondeu HTTP 401 fora da sessão; após tornar o Site público, `index.html`, manifesto, service worker e ícones passaram a responder HTTP 200 com tipos corretos. A instalação em aparelho real ainda precisa ser confirmada pelo usuário.
 
 ## Limites e riscos conhecidos
