@@ -127,10 +127,8 @@ export function shouldGuess(game: Game, dist: Distribution, top: Target): boolea
     (action) => action.answer === 'yes' || action.answer === 'no',
   );
   const isEarly = game.actions.length < 10;
-  if (
-    decisiveAnswers.length <
-    (isEarly ? GUESS_POLICY.earlyMinEvidence : GUESS_POLICY.laterMinEvidence)
-  ) return false;
+  if (decisiveAnswers.length < (isEarly ? GUESS_POLICY.earlyMinEvidence : GUESS_POLICY.laterMinEvidence))
+    return false;
 
   if (previousGuesses.length > 0) {
     const lastMiss = previousGuesses[previousGuesses.length - 1].index;
@@ -167,8 +165,7 @@ export function choose(game: Game, targets: Target[], questions: Question[]): Ch
   // Never force a low-confidence guess at the twentieth action, or because a
   // question has low gain. Keep gathering evidence until confident or defeated.
   if (shouldGuess(game, dist, top)) return { kind: 'guess', target: top, confidence };
-  if (ranked.length > 0)
-    return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
+  if (ranked.length > 0) return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
   return null;
 }
 

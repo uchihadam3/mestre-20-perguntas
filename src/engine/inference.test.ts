@@ -101,21 +101,27 @@ describe('seed e inferência', () => {
 
     // Even a highly confident posterior cannot trigger consecutive name guesses.
     const missed = { kind: 'guess' as const, targetId: realTargets[1].id, accepted: false };
-    expect(shouldGuess(
-      { ...newGame('cooldown'), actions: [...answers(10), missed, ...answers(2)] },
-      probability(0.999),
-      top,
-    )).toBe(false);
-    expect(shouldGuess(
-      { ...newGame('retry'), actions: [...answers(10), missed, ...answers(4)] },
-      probability(0.996),
-      top,
-    )).toBe(true);
-    expect(shouldGuess(
-      { ...newGame('cap'), actions: [...answers(10), missed, ...answers(4), missed, ...answers(4)] },
-      probability(0.9999),
-      top,
-    )).toBe(false);
+    expect(
+      shouldGuess(
+        { ...newGame('cooldown'), actions: [...answers(10), missed, ...answers(2)] },
+        probability(0.999),
+        top,
+      ),
+    ).toBe(false);
+    expect(
+      shouldGuess(
+        { ...newGame('retry'), actions: [...answers(10), missed, ...answers(4)] },
+        probability(0.996),
+        top,
+      ),
+    ).toBe(true);
+    expect(
+      shouldGuess(
+        { ...newGame('cap'), actions: [...answers(10), missed, ...answers(4), missed, ...answers(4)] },
+        probability(0.9999),
+        top,
+      ),
+    ).toBe(false);
   });
 
   it('na última ação continua perguntando se não há confiança, sem chute forçado', () => {
@@ -134,5 +140,4 @@ describe('seed e inferência', () => {
     expect(last.actions.length).toBe(20);
     expect(last.actions.filter((action) => action.kind === 'guess')).toHaveLength(0);
   });
-
 });

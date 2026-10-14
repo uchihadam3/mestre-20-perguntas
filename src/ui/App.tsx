@@ -384,8 +384,8 @@ export default function App() {
               )}
               <p className="game-footnote">
                 {game.actions.length === 19
-                   ? 'Última ação: sem chute forçado quando não há certeza.'
-                   : 'Estratégia: investigar primeiro, palpitar só com confiança alta.'}
+                  ? 'Última ação: sem chute forçado quando não há certeza.'
+                  : 'Estratégia: investigar primeiro, palpitar só com confiança alta.'}
               </p>
             </>
           ) : (
