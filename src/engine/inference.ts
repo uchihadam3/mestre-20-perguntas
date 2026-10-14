@@ -98,6 +98,60 @@ export function rankQuestions(
     .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
 }
 
+/**
+ * A palpite is a LAST resort: unlike a discriminating question, a failed guess
+ * removes only one candidate and wastes one of twenty precious actions.
+ *
+ * These conservative posterior thresholds are product policy, not proof that
+ * unverified catalog probabilities are calibrated. Test and recalibrate them
+ * with held-out real sessions before claiming statistical certainty.
+ */
+export const GUESS_POLICY = {
+  earlyThreshold: 0.995,
+  laterThreshold: 0.975,
+  retryThreshold: 0.995,
+  earlyMinEvidence: 5,
+  laterMinEvidence: 7,
+  minQuestionsAfterMiss: 4,
+  maxGuesses: 2,
+} as const;
+
+export function shouldGuess(game: Game, dist: Distribution, top: Target): boolean {
+  const previousGuesses = game.actions
+    .map((action, index) => ({ action, index }))
+    .filter(({ action }) => action.kind === 'guess');
+  if (previousGuesses.length >= GUESS_POLICY.maxGuesses) return false;
+
+  const questionActions = game.actions.filter((action) => action.kind === 'answer');
+  const decisiveAnswers = questionActions.filter(
+    (action) => action.answer === 'yes' || action.answer === 'no',
+  );
+  const isEarly = game.actions.length < 10;
+  if (decisiveAnswers.length < (isEarly ? GUESS_POLICY.earlyMinEvidence : GUESS_POLICY.laterMinEvidence))
+    return false;
+
+  if (previousGuesses.length > 0) {
+    const lastMiss = previousGuesses[previousGuesses.length - 1].index;
+    const newEvidence = game.actions
+      .slice(lastMiss + 1)
+      .filter((action) => action.kind === 'answer' && (action.answer === 'yes' || action.answer === 'no'));
+    if (newEvidence.length < GUESS_POLICY.minQuestionsAfterMiss) return false;
+  }
+
+  const confidence = dist.get(top.id) ?? 0;
+  const threshold =
+    previousGuesses.length > 0
+      ? GUESS_POLICY.retryThreshold
+      : isEarly
+        ? GUESS_POLICY.earlyThreshold
+        : GUESS_POLICY.laterThreshold;
+  if (confidence < threshold) return false;
+
+  const runnerUp = Math.max(0, ...[...dist].filter(([id]) => id !== top.id).map(([, p]) => p));
+  // Require a clear winner as an extra guard against ambiguous fingerprints.
+  return runnerUp === 0 || confidence / runnerUp >= (isEarly ? 25 : 12);
+}
+
 export function choose(game: Game, targets: Target[], questions: Question[]): Choice | null {
   if (game.status !== 'playing' || game.actions.length >= 20 || !targets.length) return null;
   const dist = posterior(game, targets, questions);
@@ -105,13 +159,14 @@ export function choose(game: Game, targets: Target[], questions: Question[]): Ch
     .filter((t) => !game.actions.some((a) => a.kind === 'guess' && a.targetId === t.id))
     .sort((a, b) => (dist.get(b.id) ?? 0) - (dist.get(a.id) ?? 0));
   if (!top) return null;
-  const confidence = dist.get(top.id) ?? 0;
   const ranked = rankQuestions(game, targets, questions);
-  const threshold =
-    game.actions.length < 5 ? 0.72 : game.actions.length < 10 ? 0.5 : game.actions.length < 15 ? 0.34 : 0.17;
-  if (game.actions.length === 19 || confidence >= threshold || !ranked.length || ranked[0].score < 0.06)
-    return { kind: 'guess', target: top, confidence };
-  return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
+  const confidence = dist.get(top.id) ?? 0;
+
+  // Never force a low-confidence guess at the twentieth action, or because a
+  // question has low gain. Keep gathering evidence until confident or defeated.
+  if (shouldGuess(game, dist, top)) return { kind: 'guess', target: top, confidence };
+  if (ranked.length > 0) return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
+  return null;
 }
 
 export function newGame(id = `${Date.now()}`): Game {

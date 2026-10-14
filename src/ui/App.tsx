@@ -311,7 +311,7 @@ export default function App() {
             </button>
             <div>
               <span className="eyebrow">DUELO DE INTELIGÊNCIA</span>
-              <h2>Estou seguindo as pistas</h2>
+              <h2>{choice?.kind === 'guess' ? 'Tenho um palpite forte' : 'Estou cruzando as pistas'}</h2>
             </div>
             <span className="counter">
               {game.actions.length + 1}
@@ -356,8 +356,8 @@ export default function App() {
                 </h1>
                 <p>
                   {choice.kind === 'guess'
-                    ? 'Confirme apenas se eu acertei. Um palpite também usa uma ação.'
-                    : 'Sua resposta muda o próximo passo da investigação.'}
+                    ? 'Só tento um nome quando a evidência é muito forte. Confirme se acertei.'
+                    : 'Sem nomes aleatórios: primeiro vou eliminar possibilidades com suas respostas.'}
                 </p>
               </div>
               {choice.kind === 'question' ? (
@@ -384,8 +384,8 @@ export default function App() {
               )}
               <p className="game-footnote">
                 {game.actions.length === 19
-                  ? 'Última ação do duelo.'
-                  : 'Pode sair e voltar: o duelo é salvo após cada resposta.'}
+                  ? 'Última ação: sem chute forçado quando não há certeza.'
+                  : 'Estratégia: investigar primeiro, palpitar só com confiança alta.'}
               </p>
             </>
           ) : (
