@@ -31,7 +31,11 @@ describe('seed e inferência', () => {
     const q = questions[0],
       seed = prior(targets);
     expect([...update(seed, targets, q, 'dont_know')]).toEqual([...seed]);
-    expect(Math.min(...update(seed, targets, q, 'maybe').values())).toBeGreaterThan(0);
+    const maybe = update(seed, targets, q, 'maybe');
+    expect(Math.min(...maybe.values())).toBeGreaterThan(0);
+    const real = targets.find((t) => t.name === 'Pelé')!;
+    expect(maybe.get(real.id)).toBeGreaterThan(seed.get(real.id)!);
+    expect(maybe.get(real.id)).toBeLessThan(update(seed, targets, q, 'yes').get(real.id)!);
   });
   it('avalia ganho esperado e não repete perguntas', () => {
     let game = newGame('unit');

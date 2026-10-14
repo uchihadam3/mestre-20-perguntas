@@ -21,7 +21,7 @@ export function likelihood(target: Target, question: Question, answer: Answer): 
   const scale = 1 - question.unknownRate;
   if (value === 'unknown') return scale * { yes: 0.25, no: 0.25, maybe: 0.5 }[answer];
   const chance =
-    value === 'yes' ? { yes: 0.83, no: 0.05, maybe: 0.12 } : { yes: 0.05, no: 0.83, maybe: 0.12 };
+    value === 'yes' ? { yes: 0.79, no: 0.04, maybe: 0.17 } : { yes: 0.05, no: 0.86, maybe: 0.09 };
   return scale * chance[answer];
 }
 
