@@ -200,6 +200,12 @@ Legião Urbana|group|Brasil|2|music
 Racionais MC's|group|Brasil|2|music
 Mamonas Assassinas|group|Brasil|2|music history
 Titãs|group|Brasil|2|music
+Link (Zelda)|fictional|Japão|1|game hero magic zelda
+Princesa Zelda|fictional|Japão|2|game hero magic zelda
+Kirby|fictional|Japão|2|game hero magic
+Dora Aventureira|fictional|EUA|2|cartoon series hero
+Popeye|fictional|EUA|2|cartoon comic hero
+Hello Kitty|fictional|Japão|1|cartoon animal
 `
   .trim()
   .split('\n');
@@ -210,6 +216,16 @@ const originTag: Record<string, string> = {
   Japão: 'jp',
   'Reino Unido': 'uk',
   México: 'mx',
+};
+
+const curatedSources: Record<string, string> = {
+  'Link (Zelda)': 'Nintendo: https://www.nintendo.com/jp/character/zelda/en/characters/index.html',
+  'Princesa Zelda':
+    'Nintendo: https://www.nintendo.com/us/amiibo/detail/zelda-amiibo-super-smash-bros-series/',
+  Kirby: 'Nintendo: https://kirby.nintendo.com/about/',
+  'Dora Aventureira': 'Nickelodeon: https://www.nick.com/info-page/qdwtni/dora',
+  Popeye: 'King Features: https://kingfeatures.com/our-brands/',
+  'Hello Kitty': 'Sanrio: https://www.sanrio.com/collections/characters/character-hello-kitty',
 };
 
 export const targets: Target[] = rows.map((line, index) => {
@@ -229,8 +245,8 @@ export const targets: Target[] = rows.map((line, index) => {
     fameTier,
     tags,
     aliases: [],
-    provenance: 'Curadoria editorial inicial; fatos ainda sem fonte individual',
-    confidence: 'unverified',
+    provenance: curatedSources[name] ?? 'Curadoria editorial inicial; fatos ainda sem fonte individual',
+    confidence: curatedSources[name] ? 'curated' : 'unverified',
     popularity: {
       br: baseline * (origin === 'Brasil' ? 1.4 : origin === 'EUA' ? 1.15 : 1),
       us: baseline * (origin === 'EUA' ? 1.4 : 1),

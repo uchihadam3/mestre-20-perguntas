@@ -30,7 +30,7 @@ Requer Node 24 e npm. No computador, rode `npm ci` e `npm run dev -- --host 0.0.
 
 ## Estado e limites
 
-- 197 alvos e 42 perguntas iniciais. Os atributos amplos foram classificados editorialmente, **sem fonte individual**. Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
+- 203 alvos e 57 perguntas nesta branch. A maior parte dos atributos foi classificada editorialmente sem fonte individual; seis novos alvos têm [fontes primárias de franquia](docs/CURADORIA_SEGUNDA_ETAPA.md). Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
 - Respostas `Sim`, `Não`, `Talvez`, `Não sei` são diferentes. `Não sei` não altera o posterior. Palpites recusados retiram o alvo; vitória exige confirmação.
 - A árvore do Livro Mestre é recalculada com a mesma seed, identificada como experimental. O Laboratório compara 18 perguntas de ordem fixa contra seleção adaptativa sob respostas perfeitas, sem afirmar desempenho real.
 - Progresso e partida usam `localStorage` versionado. Não há conta, sincronização ou coleta de dados. O service worker guarda recursos locais para uso offline após o primeiro carregamento por HTTPS/localhost.

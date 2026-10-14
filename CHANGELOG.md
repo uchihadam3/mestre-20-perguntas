@@ -9,3 +9,10 @@
 - Testes unitários e workflow CI.
 - Instalação pelo navegador com ícones PNG, instruções Android/iPhone e publicação com acesso à conta do proprietário.
 - Corrigido acesso público ao PWA para permitir ao navegador carregar manifesto, service worker e ícones; orientação para abrir no Chrome quando o link iniciar dentro de outro aplicativo.
+
+# Segunda etapa — investigação e Academia (em desenvolvimento)
+
+- Preservada a política prudente de palpites do commit `d651a14`.
+- Perguntas mais discriminativas para rivais, com atributo explícito desconhecido onde não houve curadoria.
+- Lume, mentor vetorial original, HUD de pistas, arquivo pós-partida e ajustes da partida no celular.
+- Academia ampliada para quatro desafios, memória espaçada por revisão vencida, missão com pistas distintas e duas novas conquistas.

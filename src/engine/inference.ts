@@ -70,6 +70,19 @@ export function informationGain(dist: Distribution, targets: Target[], q: Questi
   return Math.max(0, before - after);
 }
 
+/** Posterior mass split between known yes/no fingerprints. A good question
+ * separates plausible rivals rather than merely belonging to a popular tag. */
+export function separation(dist: Distribution, targets: Target[], q: Question): number {
+  let yes = 0;
+  let no = 0;
+  for (const target of targets) {
+    const answer = attribute(target, q);
+    if (answer === 'yes') yes += dist.get(target.id) ?? 0;
+    if (answer === 'no') no += dist.get(target.id) ?? 0;
+  }
+  return 2 * yes * no;
+}
+
 export function rankQuestions(
   game: Game,
   targets: Target[],
@@ -77,22 +90,22 @@ export function rankQuestions(
 ): { question: Question; gain: number; score: number }[] {
   const dist = posterior(game, targets, questions);
   const used = new Set(game.actions.filter((a) => a.kind === 'answer').map((a) => a.questionId));
+  const byId = new Map(targets.map((t) => [t.id, t]));
   return questions
     .filter((q) => !used.has(q.id))
     .map((question) => {
       const gain = informationGain(dist, targets, question);
       const applicableMass = [...dist].reduce(
         (n, [id, p]) =>
-          n +
-          (!question.applicable || question.applicable.includes(targets.find((t) => t.id === id)!.type)
-            ? p
-            : 0),
+          n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
         0,
       );
+      const split = separation(dist, targets, question);
       return {
         question,
         gain,
-        score: gain * (0.55 + 0.45 * applicableMass) - question.cost - question.unknownRate * 0.25,
+        score:
+          gain * (0.55 + 0.45 * applicableMass) + 0.35 * split - question.cost - question.unknownRate * 0.25,
       };
     })
     .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
@@ -188,6 +201,10 @@ export function answerGame(game: Game, choice: Choice, answer: Answer | boolean)
     endedAt: won || actions.length === 20 ? Date.now() : undefined,
     lastGuess: action.kind === 'guess' ? action.targetId : game.lastGuess,
   };
+}
+
+export function concedeGame(game: Game): Game {
+  return game.status === 'playing' ? { ...game, status: 'lost', endedAt: Date.now() } : game;
 }
 
 export function medal(actions: number): 'elite' | 'ouro' | 'prata' | 'bronze' {

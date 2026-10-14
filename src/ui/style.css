@@ -57,7 +57,6 @@ small {
   min-height: 100dvh;
   max-width: 640px;
   margin: 0 auto;
-  overflow: hidden;
   background: radial-gradient(ellipse at 50% 5%, #203060 0, #0d1735 37%, #080e23 75%);
   box-shadow: 0 0 90px #020616;
 }
@@ -148,6 +147,11 @@ small {
   padding: 12px 23px calc(92px + env(safe-area-inset-bottom));
   position: relative;
 }
+.screen h1,
+.screen h2,
+.screen p {
+  overflow-wrap: anywhere;
+}
 .eyebrow {
   font-weight: 750;
   font-size: 10px;
@@ -237,6 +241,23 @@ small {
     0 2px 0 #885a2d,
     0 0 25px #d7b66599;
   transform: rotate(13deg) translateY(-6px);
+}
+.mentor {
+  width: 118%;
+  height: 118%;
+  filter: drop-shadow(0 10px 13px #030a23a8);
+  animation: mentor-hover 4s ease-in-out infinite;
+}
+.mentor-compact {
+  width: 55px;
+  height: 55px;
+  flex: none;
+  animation: none;
+}
+@keyframes mentor-hover {
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
 }
 .star {
   position: absolute;
@@ -485,8 +506,7 @@ small {
   margin-bottom: 23px;
 }
 .game-shell {
-  height: 100dvh;
-  min-height: 580px;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -499,6 +519,62 @@ small {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+.case-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 53px;
+  margin: 3px 0;
+  padding: 0 12px 0 0;
+  border: 1px solid #7ed9cc55;
+  border-radius: 14px;
+  background: linear-gradient(100deg, #173e51, #182849);
+}
+.case-status span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.case-status b {
+  color: #d9f9e9;
+  font: 15px Georgia;
+}
+.case-status small {
+  color: #abcacb;
+  font-size: 10px;
+}
+.clue-feedback {
+  align-self: center;
+  color: #9ee9d8;
+  font-size: 11px;
+  min-height: 16px;
+}
+.case-file {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e1c17a66;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 0 0 16px;
+  background: linear-gradient(135deg, #233c51, #15223d);
+}
+.case-file h2 {
+  font-size: 20px;
+  margin: 6px 0 10px;
+}
+.case-file div {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid #b7bbba38;
+}
+.case-file b {
+  font-size: 12px;
+}
+.case-file small {
+  color: #aac7c7;
+  font-size: 10px;
 }
 .game-heading {
   display: flex;
@@ -581,7 +657,7 @@ small {
 }
 .question-panel {
   flex: 1;
-  min-height: 170px;
+  min-height: 165px;
   border: 1px solid #dec07965;
   border-radius: 22px;
   background: radial-gradient(ellipse at 50% 0, #263861, #132040 60%, #101b38);
@@ -595,6 +671,33 @@ small {
   text-align: center;
   padding: 18px 18px;
   position: relative;
+}
+.mastery-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 10px 0 20px;
+}
+.mastery-strip div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  min-height: 72px;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #8bd4cb55;
+  border-radius: 12px;
+  background: #163247;
+}
+.mastery-strip b {
+  color: #f0d28b;
+  font: 26px Georgia;
+}
+.mastery-strip small {
+  font-size: 10px;
+  line-height: 1.2;
+  color: #b6c9cf;
 }
 .question-panel:before,
 .question-panel:after {
@@ -1166,6 +1269,57 @@ small {
   }
   .game-footnote {
     margin-top: 6px;
+  }
+}
+@media (max-height: 750px) {
+  .game-shell .topbar {
+    height: 56px;
+    padding-top: 5px;
+  }
+  .game-screen {
+    padding-top: 2px;
+  }
+  .game-heading {
+    min-height: 38px;
+  }
+  .case-status {
+    min-height: 46px;
+  }
+  .mentor-compact {
+    width: 46px;
+    height: 46px;
+  }
+  .milestones {
+    margin: 7px 1px 9px;
+  }
+  .question-panel {
+    min-height: 145px;
+    padding: 12px;
+  }
+  .question-crest {
+    width: 31px;
+    height: 31px;
+    font-size: 19px;
+    margin-bottom: 2px;
+  }
+  .question-panel h1 {
+    font-size: clamp(22px, 6.3vw, 32px);
+    margin: 6px 0;
+  }
+  .answer-grid,
+  .guess-actions {
+    margin-top: 9px;
+  }
+  .answer {
+    min-height: 60px;
+  }
+  .game-footnote {
+    margin-top: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mentor {
+    animation: none;
   }
 }
 @media (max-width: 350px) {

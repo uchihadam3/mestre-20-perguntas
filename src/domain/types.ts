@@ -21,6 +21,7 @@ export type Question = {
   cost: number;
   unknownRate: number;
   applicable?: TargetType[];
+  explicit?: boolean;
 };
 export type GameAction =
   | { kind: 'answer'; questionId: string; answer: Answer }
@@ -33,7 +34,14 @@ export type Game = {
   endedAt?: number;
   lastGuess?: string;
 };
-export type TrainingRecord = { correct: number; total: number; dueAt: number; interval: number };
+export type TrainingRecord = {
+  correct: number;
+  total: number;
+  dueAt: number;
+  interval: number;
+  delayed?: number;
+  lastRewardDate?: string;
+};
 export type Profile = {
   xp: number;
   games: number;
@@ -41,7 +49,7 @@ export type Profile = {
   best: number | null;
   medals: Record<string, number>;
   training: Record<string, TrainingRecord>;
-  daily: { date: string; count: number; claimed: boolean };
+  daily: { date: string; count: number; claimed: boolean; ids?: string[] };
   dailyCompleted: number;
   history: { actions: number; win: boolean; date: string }[];
   sound: boolean;

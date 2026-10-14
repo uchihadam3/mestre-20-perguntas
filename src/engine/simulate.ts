@@ -11,16 +11,35 @@ export type Benchmark = {
   within15: number;
   meanWin: number | null;
 };
+// Fixed fixture keeps release-to-release comparisons meaningful as the catalog grows.
+const referenceNames = [
+  'Pelé',
+  'Kobe Bryant',
+  'Billie Eilish',
+  'Chico Buarque',
+  'Scarlett Johansson',
+  'Silvio Santos',
+  'Albert Einstein',
+  'Homer Simpson',
+  'Coringa',
+  'Lord Voldemort',
+  'Goku',
+  'Cebolinha',
+];
 export function simulate(
   targets: Target[],
   questions: Question[],
   method: 'adaptive' | 'fixed',
   sample = 12,
 ): Benchmark {
-  const selected = Array.from(
-    { length: Math.min(sample, targets.length) },
-    (_, i) => targets[Math.floor((i * targets.length) / Math.min(sample, targets.length))],
-  );
+  const reference = referenceNames.map((name) => targets.find((t) => t.name === name));
+  const selected =
+    sample === 12 && reference.every(Boolean)
+      ? (reference as Target[])
+      : Array.from(
+          { length: Math.min(sample, targets.length) },
+          (_, i) => targets[Math.floor((i * targets.length) / Math.min(sample, targets.length))],
+        );
   const results: Game[] = selected.map((target, i) => {
     let game = newGame(`sim-${method}-${i}`);
     for (let step = 0; step < 20 && game.status === 'playing'; step++) {

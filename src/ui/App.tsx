@@ -2,9 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Answer, Game, Profile, Target } from '../domain/types';
 import { targets } from '../data/targets';
 import { attribute, questions } from '../data/questions';
-import { answerGame, choose, medal, newGame, posterior, rankQuestions } from '../engine/inference';
+import {
+  answerGame,
+  choose,
+  concedeGame,
+  informationGain,
+  medal,
+  newGame,
+  posterior,
+  rankQuestions,
+} from '../engine/inference';
 import { simulate, type Benchmark } from '../engine/simulate';
-import { badges, finish, load, save, train } from '../persistence/storage';
+import { badges, finish, load, mastery, save, train } from '../persistence/storage';
 
 type Page = 'hub' | 'game' | 'result' | 'academy' | 'book' | 'lab' | 'settings';
 type InstallPrompt = Event & {
@@ -13,7 +22,7 @@ type InstallPrompt = Event & {
 };
 type Exercise = {
   id: string;
-  mode: 'memory' | 'reading';
+  mode: 'memory' | 'reading' | 'split' | 'error';
   prompt: string;
   options: string[];
   correct: string;
@@ -37,27 +46,44 @@ const nextRank = (xp: number) => (xp < 120 ? 120 : xp < 400 ? 400 : xp < 900 ? 9
 const origin = (t: Target) =>
   `${t.type === 'real' ? 'Pessoa real' : t.type === 'group' ? 'Grupo' : 'Personagem'} · ${t.origin}`;
 function getExercise(mode: Exercise['mode'], step: number): Exercise {
-  if (mode === 'memory') {
+  if (mode === 'memory' || mode === 'split' || mode === 'error') {
     const target = targets[((step % 12) * 17 + 7) % targets.length];
     const first = choose(newGame('lesson'), targets, questions);
+    const firstAnswer = first?.kind === 'question' ? attribute(target, first.question) : 'unknown';
     const game =
       first?.kind === 'question'
-        ? answerGame(newGame('lesson'), first, attribute(target, first.question) as Answer)
+        ? answerGame(newGame('lesson'), first, firstAnswer === 'unknown' ? 'dont_know' : firstAnswer)
         : newGame('lesson');
     const top = rankQuestions(game, targets, questions).slice(0, 3);
+    if (mode === 'error') {
+      return {
+        id: `error:${target.id}`,
+        mode,
+        prompt: `Uma pista sobre ${target.name} já foi registrada. Qual decisão evita um chute apressado?`,
+        options: [
+          'Perguntar para separar os candidatos',
+          'Tentar três nomes populares',
+          'Tratar “Não sei” como “Não”',
+        ],
+        correct: 'Perguntar para separar os candidatos',
+        note: 'Palpites consomem ações. Respostas incertas não eliminam candidatos; uma pergunta que divide a base oferece evidência nova.',
+      };
+    }
     const options = top
       .map((r) => r.question.text)
       .sort((a, b) => ((a.charCodeAt(0) + step * 7) % 13) - ((b.charCodeAt(0) + step * 7) % 13));
     return {
-      id: `memory:${target.id}`,
+      id: `${mode}:${target.id}`,
       mode,
       prompt:
-        first?.kind === 'question'
-          ? `Depois de responder “${attribute(target, first.question) === 'yes' ? 'Sim' : attribute(target, first.question) === 'no' ? 'Não' : 'Não sei'}” a “${first.question.text}”, qual pergunta o motor escolheria?`
-          : 'Qual pergunta abre melhor esta base?',
+        mode === 'split'
+          ? `Qual pergunta divide melhor os candidatos após a primeira pista de ${target.name}?`
+          : first?.kind === 'question'
+            ? `Depois de responder “${attribute(target, first.question) === 'yes' ? 'Sim' : attribute(target, first.question) === 'no' ? 'Não' : 'Não sei'}” a “${first.question.text}”, qual pergunta o motor escolheria?`
+            : 'Qual pergunta abre melhor esta base?',
       options,
       correct: top[0].question.text,
-      note: 'Compare o ganho de informação dos candidatos; esta escolha vale apenas para a base atual.',
+      note: `A pergunta escolhida separa os candidatos desta base com ganho esperado de ${top[0].gain.toFixed(2)} bits. O caminho pode mudar com outra resposta.`,
     };
   }
   const target = targets[((step % 24) * 23 + 3) % targets.length];
@@ -74,6 +100,60 @@ function getExercise(mode: Exercise['mode'], step: number): Exercise {
   };
 }
 
+function Mentor({ compact = false }: { compact?: boolean }) {
+  return (
+    <svg className={`mentor ${compact ? 'mentor-compact' : ''}`} viewBox="0 0 220 220" aria-hidden="true">
+      <defs>
+        <radialGradient id="lume" cx="35%" cy="25%" r="75%">
+          <stop stopColor="#fff1b8" />
+          <stop offset=".45" stopColor="#f0c977" />
+          <stop offset="1" stopColor="#ae6c4c" />
+        </radialGradient>
+        <linearGradient id="cloak" x2="1" y2="1">
+          <stop stopColor="#5ed4cf" />
+          <stop offset="1" stopColor="#243c67" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="110" cy="195" rx="74" ry="11" fill="#09142c" opacity=".55" />
+      <path
+        d="M48 181 Q53 139 83 134 L137 134 Q169 145 174 181 Q110 201 48 181Z"
+        fill="url(#cloak)"
+        stroke="#8be2d3"
+        strokeWidth="3"
+      />
+      <path d="M83 135 L110 167 L137 135" fill="none" stroke="#e9c785" strokeWidth="4" />
+      <path
+        d="M54 72 Q110 13 167 72 L162 122 Q145 150 110 151 Q75 150 58 122Z"
+        fill="url(#lume)"
+        stroke="#f8e1a0"
+        strokeWidth="4"
+      />
+      <path
+        d="M51 76 Q110 45 169 76 L179 62 Q148 42 126 41 L117 22 L91 22 L88 42 Q64 42 42 62Z"
+        fill="#273d60"
+        stroke="#8adbd3"
+        strokeWidth="3"
+      />
+      <path d="M38 77 Q110 91 183 77" fill="none" stroke="#e5c783" strokeWidth="7" strokeLinecap="round" />
+      <circle cx="86" cy="97" r="11" fill="#172b46" />
+      <circle cx="135" cy="97" r="11" fill="#172b46" />
+      <circle cx="90" cy="93" r="3" fill="#fff9d8" />
+      <circle cx="139" cy="93" r="3" fill="#fff9d8" />
+      <path
+        d="M101 119 Q110 127 119 119"
+        fill="none"
+        stroke="#79513c"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle cx="135" cy="98" r="23" fill="none" stroke="#f9e2a4" strokeWidth="5" />
+      <path d="M153 115 L177 139" stroke="#f9e2a4" strokeWidth="7" strokeLinecap="round" />
+      <path d="M109 29 L109 40" stroke="#f9e2a4" strokeWidth="3" />
+      <circle cx="110" cy="20" r="4" fill="#f9e2a4" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [initial] = useState(load);
   const [game, setGame] = useState<Game | null>(initial.game);
@@ -86,6 +166,7 @@ export default function App() {
   const [benchmarks, setBenchmarks] = useState<Benchmark[] | null>(null);
   const [benchmarkBusy, setBenchmarkBusy] = useState(false);
   const [error, setError] = useState('');
+  const [feedback, setFeedback] = useState('');
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
   const [installHelp, setInstallHelp] = useState(false);
   const [installed, setInstalled] = useState(
@@ -116,6 +197,25 @@ export default function App() {
   const choice = useMemo(() => (game ? choose(game, targets, questions) : null), [game]);
   const bookChoice = useMemo(() => choose(book, targets, questions), [book]);
   const bookDist = useMemo(() => posterior(book, targets, questions), [book]);
+  const caseFile = useMemo(() => {
+    if (!game || game.status === 'playing') return [];
+    return game.actions
+      .flatMap((action, index) => {
+        if (action.kind !== 'answer') return [];
+        const question = questions.find((q) => q.id === action.questionId);
+        if (!question) return [];
+        const before = posterior({ ...game, actions: game.actions.slice(0, index) }, targets, questions);
+        return [
+          {
+            text: question.text,
+            answer: answers.find((a) => a.value === action.answer)?.label,
+            gain: informationGain(before, targets, question),
+          },
+        ];
+      })
+      .sort((a, b) => b.gain - a.gain)
+      .slice(0, 3);
+  }, [game]);
   const dailyCount = Math.min(profile.daily.count, 3);
   const remainingXp = nextRank(profile.xp) - profile.xp;
   const tierStart = profile.xp >= 900 ? 900 : profile.xp >= 400 ? 400 : profile.xp >= 120 ? 120 : 0;
@@ -164,6 +264,10 @@ export default function App() {
     if (!game || !choice) return;
     const next = answerGame(game, choice, response);
     setGame(next);
+    if (choice.kind === 'question') {
+      const label = answers.find((a) => a.value === response)?.label ?? 'Resposta';
+      setFeedback(`${label} · pista registrada`);
+    } else setFeedback(response ? 'Caso resolvido!' : 'Palpite descartado · novas pistas');
     if (next.status !== 'playing' && game.status === 'playing') {
       setProfile((p) => finish(p, next));
       setPage('result');
@@ -176,6 +280,13 @@ export default function App() {
     )
       navigator.vibrate?.(12);
   }
+  function conclude() {
+    if (!game || game.status !== 'playing') return;
+    const next = concedeGame(game);
+    setGame(next);
+    setProfile((p) => finish(p, next));
+    setPage('result');
+  }
   function answerExercise(value: string) {
     if (!exercise || exerciseAnswer) return;
     setExerciseAnswer(value);
@@ -184,7 +295,7 @@ export default function App() {
   }
   function newExercise(mode: Exercise['mode']) {
     let nextStep = exerciseStep + 1;
-    for (let i = 0; i < (mode === 'memory' ? 12 : 24); i++, nextStep++) {
+    for (let i = 0; i < (mode === 'reading' ? 24 : 12); i++, nextStep++) {
       const candidate = getExercise(mode, nextStep);
       if (
         candidate.id !== exercise?.id &&
@@ -213,6 +324,8 @@ export default function App() {
     }, 30);
   }
   const hasGame = game?.status === 'playing';
+  const progress = mastery(profile);
+  const achievements = badges(profile);
   return (
     <main className={`app-shell ${page === 'game' ? 'game-shell' : ''}`}>
       <div className="ambient" aria-hidden="true" />
@@ -237,7 +350,7 @@ export default function App() {
           <div className="hero-art" aria-hidden="true">
             <div className="outer-orbit">
               <div className="inner-orbit">
-                <span>?</span>
+                <Mentor />
               </div>
             </div>
             <i className="star star-a">✧</i>
@@ -245,13 +358,13 @@ export default function App() {
             <i className="star star-c">·</i>
           </div>
           <div className="hero-copy">
-            <span className="eyebrow gold">O DESAFIO COMEÇA NA SUA MENTE</span>
+            <span className="eyebrow gold">LUME · DETETIVE DAS PISTAS</span>
             <h1>
               Pense em alguém.
               <br />
               <em>Eu descubro.</em>
             </h1>
-            <p>Uma pessoa, personagem ou grupo. Tenho até 20 ações para revelar sua escolha.</p>
+            <p>Pense em uma pessoa, personagem ou grupo. Lume segue suas pistas em até 20 ações.</p>
           </div>
           <button className="primary-button play-button" onClick={() => (hasGame ? go('game') : start())}>
             <span>{hasGame ? 'CONTINUAR PARTIDA' : 'COMEÇAR PARTIDA'}</span>
@@ -297,7 +410,9 @@ export default function App() {
               <small>Melhor marca</small>
             </div>
             <div>
-              <b>{badges(profile).filter((b) => b.earned).length}/6</b>
+              <b>
+                {achievements.filter((b) => b.earned).length}/{achievements.length}
+              </b>
               <small>Conquistas</small>
             </div>
           </div>
@@ -318,6 +433,27 @@ export default function App() {
               <small>/20</small>
             </span>
           </div>
+          <div className="case-status" aria-live="polite">
+            <Mentor compact />
+            <span>
+              <b>
+                {game.actions.length < 6
+                  ? 'Abrindo o caso'
+                  : game.actions.length < 13
+                    ? 'Cruzando pistas'
+                    : 'Afunilando suspeitos'}
+              </b>
+              <small>
+                {game.actions.filter((a) => a.kind === 'answer').length} pistas coletadas ·{' '}
+                {Math.max(0, 20 - game.actions.length)} ações restantes
+              </small>
+            </span>
+          </div>
+          {feedback && (
+            <span className="clue-feedback" role="status">
+              {feedback}
+            </span>
+          )}
           <div className="milestones" aria-label={`${game.actions.length} de 20 ações usadas`}>
             {[5, 10, 15, 20].map((m, i) => (
               <div
@@ -390,9 +526,10 @@ export default function App() {
             </>
           ) : (
             <div className="question-panel">
-              <h2>Não há mais candidatos.</h2>
-              <button className="primary-button" onClick={start}>
-                Nova partida
+              <h2>Preciso de mais pistas do que esta base permite.</h2>
+              <p>Não vou tentar nomes ao acaso. Podemos encerrar este caso com honestidade.</p>
+              <button className="secondary-button" onClick={conclude}>
+                Encerrar investigação
               </button>
             </div>
           )}
@@ -412,7 +549,7 @@ export default function App() {
           <p>
             {game.status === 'won'
               ? `Acerto confirmado em ${game.actions.length} ${game.actions.length === 1 ? 'ação' : 'ações'}.`
-              : `Não acertei em 20 ações. Sua escolha pode não estar na base experimental.`}
+              : `Não acertei em ${game.actions.length} ações. Sua escolha pode não estar na base experimental.`}
           </p>
           <div className="result-stats">
             <div>
@@ -428,6 +565,21 @@ export default function App() {
               <small>Palpites</small>
             </div>
           </div>
+          {caseFile.length > 0 && (
+            <div className="case-file">
+              <span className="eyebrow gold">ARQUIVO DA PARTIDA</span>
+              <h2>As pistas que mais ajudaram</h2>
+              {caseFile.map((clue) => (
+                <div key={clue.text}>
+                  <b>{clue.text}</b>
+                  <small>
+                    {clue.answer} · ganho estimado {clue.gain.toFixed(2)} bits
+                  </small>
+                </div>
+              ))}
+              <small>Estimativas internas da base experimental; não são probabilidades calibradas.</small>
+            </div>
+          )}
           <button className="primary-button" onClick={start}>
             JOGAR NOVAMENTE ↗
           </button>
@@ -455,18 +607,43 @@ export default function App() {
               <small>Responda como um alvo conhecido</small>
               <i>›</i>
             </button>
-            <div className="locked-node">
+            <button className="lesson-node" onClick={() => newExercise('split')}>
               <span>03</span>
-              <b>Novos ramos</b>
-              <small>Em desenvolvimento</small>
-              <i>⌁</i>
+              <b>Divida a busca</b>
+              <small>Compare perguntas que eliminam candidatos</small>
+              <i>›</i>
+            </button>
+            <button className="lesson-node" onClick={() => newExercise('error')}>
+              <span>04</span>
+              <b>Detecte o erro</b>
+              <small>Evite palpites prematuros e pistas falsas</small>
+              <i>›</i>
+            </button>
+          </div>
+          <div className="mastery-strip" aria-label="Progresso de memorização">
+            <div>
+              <b>{progress.learned}</b>
+              <small>Pistas aprendidas</small>
+            </div>
+            <div>
+              <b>{progress.mastered}</b>
+              <small>Dominadas após revisão</small>
+            </div>
+            <div>
+              <b>{progress.due}</b>
+              <small>Para revisar</small>
             </div>
           </div>
           {exercise && (
             <div className="exercise-card">
               <div className="row spread">
                 <span className="eyebrow">
-                  EXERCÍCIO · {exercise.mode === 'memory' ? 'ESTRATÉGIA' : 'CONHECIMENTO'}
+                  EXERCÍCIO ·{' '}
+                  {exercise.mode === 'reading'
+                    ? 'CONHECIMENTO'
+                    : exercise.mode === 'error'
+                      ? 'DECISÃO'
+                      : 'ESTRATÉGIA'}
                 </span>
                 <button
                   className="close-button"
@@ -500,7 +677,9 @@ export default function App() {
               {exerciseAnswer && (
                 <div role="status" className="feedback">
                   <b>
-                    {exerciseAnswer === exercise.correct ? 'Boa leitura! +8 XP' : 'Vamos revisar essa pista.'}
+                    {exerciseAnswer === exercise.correct
+                      ? 'Boa leitura! Pista registrada.'
+                      : 'Vamos revisar essa pista.'}
                   </b>
                   <p>{exercise.note}</p>
                   <button onClick={() => newExercise(exercise.mode)}>Próximo desafio ›</button>
@@ -522,10 +701,12 @@ export default function App() {
           </p>
           <div className="section-title">
             <span className="eyebrow">CONQUISTAS</span>
-            <b>{badges(profile).filter((b) => b.earned).length}/6</b>
+            <b>
+              {achievements.filter((b) => b.earned).length}/{achievements.length}
+            </b>
           </div>
           <div className="badge-list">
-            {badges(profile).map((b) => (
+            {achievements.map((b) => (
               <div key={b.id} className={`badge ${b.earned ? 'earned' : ''}`}>
                 <span>{b.earned ? '✦' : '◇'}</span>
                 <div>

@@ -5,11 +5,13 @@ import { validateData } from '../data/validate';
 import {
   answerGame,
   choose,
+  concedeGame,
   informationGain,
   newGame,
   posterior,
   prior,
   rankQuestions,
+  separation,
   shouldGuess,
   GUESS_POLICY,
   update,
@@ -51,6 +53,40 @@ describe('seed e inferência', () => {
     );
     expect([...posterior(game, targets, questions).values()].reduce((a, b) => a + b, 0)).toBeCloseTo(1);
   });
+  it('prefere pistas capazes de dividir rivais e preserva desconhecido nas fichas parciais', () => {
+    const q = questions.find((item) => item.id === 'woman')!;
+    const scarlett = targets.find((target) => target.name === 'Scarlett Johansson')!;
+    const robert = targets.find((target) => target.name === 'Robert Downey Jr.')!;
+    const pele = targets.find((target) => target.name === 'Pelé')!;
+    expect(attribute(scarlett, q)).toBe('yes');
+    expect(attribute(robert, q)).toBe('no');
+    expect(
+      attribute(
+        targets.find((target) => target.name === 'Optimus Prime')!,
+        q,
+      ),
+    ).toBe('unknown');
+    expect(
+      separation(
+        new Map([
+          [scarlett.id, 0.5],
+          [robert.id, 0.5],
+        ]),
+        [scarlett, robert],
+        q,
+      ),
+    ).toBeCloseTo(0.5);
+    expect(
+      separation(
+        new Map([
+          [scarlett.id, 0.5],
+          [pele.id, 0.5],
+        ]),
+        [scarlett, pele],
+        q,
+      ),
+    ).toBeCloseTo(0.5);
+  });
   it('nunca passa de 20 ações, incluindo palpites recusados', () => {
     let game = newGame('limit');
     const target = targets[0];
@@ -75,6 +111,14 @@ describe('seed e inferência', () => {
     const guess = { kind: 'guess' as const, target: targets[0], confidence: 0.9 };
     expect(answerGame(newGame(), guess, false).status).toBe('playing');
     expect(answerGame(newGame(), guess, true).status).toBe('won');
+  });
+  it('encerra honestamente um ramo sem pergunta útil', () => {
+    const game = newGame('sem-pistas');
+    expect(choose(game, targets, [])).toBeNull();
+    const ended = concedeGame(game);
+    expect(ended.status).toBe('lost');
+    expect(ended.actions).toHaveLength(0);
+    expect(concedeGame(ended)).toBe(ended);
   });
   it('não transforma incerteza em sequência de palpites', () => {
     const realTargets = targets.slice(0, 2);

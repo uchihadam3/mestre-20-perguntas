@@ -1,6 +1,18 @@
 # Progresso — primeiro marco
 
-## Implementado
+## Segunda etapa em andamento (2026-10-14)
+
+- Preservada a política de palpites do commit `d651a14`: limiares 99,5%/97,5%, evidências mínimas, intervalo após erro, no máximo dois palpites e nenhuma tentativa forçada na ação 20.
+- Seleção de pergunta agora considera a massa de candidatos plausíveis separada por respostas conhecidas, além do ganho esperado. Adicionadas 14 perguntas de discriminação para grupos próximos e uma de franquia; pistas sem anotação explícita ficam como **desconhecidas**, sem virar “Não”. Parte das pistas foi conferida em fontes primárias; o restante ainda requer auditoria.
+- Benchmark determinístico com respostas perfeitas, **mesmos 12 alvos fixos**: estratégia adaptativa passou de **1/12** (após a correção conservadora de palpites e antes das novas pistas) para **6/12**. A base continua insuficiente para confiabilidade pública; isso não mede pessoas reais. Perguntas fixas: 0/12 nesta amostra.
+- Interface: Lume, mentor original em SVG; HUD da investigação e feedback de resposta; arquivo pós-partida mostra até três pistas informativas segundo a base. Densidade da tela de jogo ajustada para alturas menores e rolagem lateral mascarada no contêiner principal removida.
+- Academia: quatro modos jogáveis (previsão, leitura, divisão e erro da IA), 8 conquistas, três métricas de memorização. A missão diária agora exige três pistas diferentes; repetir cedo a mesma pista não acelera revisão nem gera XP de novo no dia. Maestria exige revisões vencidas em dias futuros.
+- Verificações locais: `validate:data`, `format:check`, `typecheck`, `lint`, `test` e `build` após esta etapa; conferir CI do commit. Testes de viewport, screenshots, acessibilidade em leitor de tela e instalação em aparelho real **pendentes** neste ambiente sem controle de navegador. A versão publicada anteriormente não contém ainda esta segunda etapa.
+- A base tem **203 alvos e 57 perguntas**; seis alvos com fontes primárias no [lote de curadoria](CURADORIA_SEGUNDA_ETAPA.md). Curadoria individual do restante, calibração com respostas humanas, modo humano versus IA e árvore estável para memorização permanecem pendentes.
+
+## Primeiro marco (registro histórico)
+
+### Implementado
 
 - Aplicação React/TypeScript/Vite em português brasileiro, com interface dark-first para retrato, foco visível, botões grandes, áreas seguras e respeito a movimento reduzido.
 - Partida contínua com salvamento após ações, quatro respostas, palpites explícitos, confirmação de vitória, medalhas e limite absoluto de 20 ações.
@@ -10,7 +22,7 @@
 - Manifesto e service worker para instalação/uso offline, após primeiro acesso por HTTPS/localhost.
 - [Versão instalável publicada](https://mestre-20-perguntas.uchihadam.chatgpt.site) com acesso público; botão de instalação no Hub e em Configurações, ícones PNG e instruções Android/iPhone.
 
-## Verificações realizadas
+### Verificações realizadas naquele marco
 
 - `npm run validate:data`: 197 alvos, 42 perguntas, 0 problemas estruturais.
 - `npm test`: 9 testes passaram; incluem posterior, quatro respostas, rejeição de palpites, 20 ações e recompensas.

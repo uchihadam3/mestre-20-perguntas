@@ -65,24 +65,38 @@ export function finish(profile: Profile, game: Game): Profile {
 export function train(profile: Profile, id: string, correct: boolean): Profile {
   const now = Date.now();
   const old = profile.training[id] ?? { correct: 0, total: 0, dueAt: now, interval: 0 };
-  const interval = correct ? Math.min(30, old.interval ? old.interval * 2 : 1) : 0;
+  const due = old.dueAt <= now;
+  const interval = correct ? (due ? Math.min(30, old.interval ? old.interval * 2 : 1) : old.interval) : 0;
   const daily = profile.daily.date === today() ? profile.daily : { date: today(), count: 0, claimed: false };
-  const count = daily.count + Number(correct);
+  const rewarded = correct && due && old.lastRewardDate !== today();
+  const ids = daily.ids ?? [];
+  const count = daily.count + Number(rewarded && !ids.includes(id));
   const claimed = daily.claimed || count >= 3;
   return {
     ...profile,
-    xp: profile.xp + (correct ? 8 : 0) + (!daily.claimed && claimed ? 20 : 0),
+    xp: profile.xp + (rewarded ? 8 : 0) + (!daily.claimed && claimed ? 20 : 0),
     dailyCompleted: profile.dailyCompleted + Number(!daily.claimed && claimed),
-    daily: { ...daily, count, claimed },
+    daily: { ...daily, count, claimed, ids: rewarded && !ids.includes(id) ? [...ids, id] : ids },
     training: {
       ...profile.training,
       [id]: {
         correct: old.correct + Number(correct),
         total: old.total + 1,
         interval,
-        dueAt: now + interval * 86400000,
+        dueAt: correct && !due ? old.dueAt : now + interval * 86400000,
+        delayed: (old.delayed ?? 0) + Number(correct && due && old.interval >= 1),
+        lastRewardDate: rewarded ? today() : old.lastRewardDate,
       },
     },
+  };
+}
+
+export function mastery(profile: Profile): { learned: number; mastered: number; due: number } {
+  const records = Object.values(profile.training);
+  return {
+    learned: records.filter((r) => r.correct > 0).length,
+    mastered: records.filter((r) => (r.delayed ?? 0) >= 2 && r.interval >= 4).length,
+    due: records.filter((r) => r.total > 0 && r.dueAt <= Date.now()).length,
   };
 }
 
@@ -104,6 +118,18 @@ export function badges(profile: Profile): { id: string; title: string; detail: s
       title: 'Missão cumprida',
       detail: 'Acerte 3 treinos no dia',
       earned: profile.dailyCompleted > 0,
+    },
+    {
+      id: 'review',
+      title: 'Memória duradoura',
+      detail: 'Domine 3 pistas em dias diferentes',
+      earned: mastery(profile).mastered >= 3,
+    },
+    {
+      id: 'archive',
+      title: 'Arquivo vivo',
+      detail: 'Aprenda 20 pistas diferentes',
+      earned: mastery(profile).learned >= 20,
     },
   ];
 }
