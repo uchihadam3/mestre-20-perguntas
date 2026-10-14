@@ -11,6 +11,7 @@ import {
   newGame,
   posterior,
   rankQuestions,
+  separation,
 } from '../engine/inference';
 import { simulate, type Benchmark } from '../engine/simulate';
 import { badges, finish, load, mastery, save, train } from '../persistence/storage';
@@ -45,7 +46,7 @@ const rank = (xp: number) =>
 const nextRank = (xp: number) => (xp < 120 ? 120 : xp < 400 ? 400 : xp < 900 ? 900 : 1400);
 const origin = (t: Target) =>
   `${t.type === 'real' ? 'Pessoa real' : t.type === 'group' ? 'Grupo' : 'Personagem'} · ${t.origin}`;
-function getExercise(mode: Exercise['mode'], step: number): Exercise {
+export function getExercise(mode: Exercise['mode'], step: number): Exercise {
   if (mode === 'memory' || mode === 'split' || mode === 'error') {
     const target = targets[((step % 12) * 17 + 7) % targets.length];
     const first = choose(newGame('lesson'), targets, questions);
@@ -54,21 +55,66 @@ function getExercise(mode: Exercise['mode'], step: number): Exercise {
       first?.kind === 'question'
         ? answerGame(newGame('lesson'), first, firstAnswer === 'unknown' ? 'dont_know' : firstAnswer)
         : newGame('lesson');
-    const top = rankQuestions(game, targets, questions).slice(0, 3);
+    const ranked = rankQuestions(game, targets, questions);
     if (mode === 'error') {
+      const cases = [
+        {
+          prompt: 'Lume ouviu “Não sei”. O que fazer com essa resposta?',
+          options: [
+            'Eliminar os alvos com “Não”',
+            'Manter os candidatos e buscar outra pista',
+            'Tentar o nome mais popular',
+          ],
+          correct: 'Manter os candidatos e buscar outra pista',
+          note: '“Não sei” não informa se a característica está presente; o motor conserva a distribuição.',
+        },
+        {
+          prompt: `Após uma pista sobre ${target.name}, vários candidatos ainda parecem possíveis. Qual o próximo passo?`,
+          options: [
+            'Testar três nomes em sequência',
+            'Escolher uma pergunta que os separe',
+            'Confiar apenas na popularidade',
+          ],
+          correct: 'Escolher uma pergunta que os separe',
+          note: 'Cada palpite gasta uma ação. Uma pergunta divisora pode eliminar vários rivais de uma vez.',
+        },
+        {
+          prompt: 'Duas respostas parecem contraditórias. Como investigar sem inventar certeza?',
+          options: [
+            'Forçar um palpite',
+            'Apagar a resposta menos conveniente',
+            'Buscar outra pista e admitir incerteza',
+          ],
+          correct: 'Buscar outra pista e admitir incerteza',
+          note: 'Evidências editoriais e respostas humanas podem falhar. A investigação deve continuar sem declarar certeza.',
+        },
+      ];
       return {
         id: `error:${target.id}`,
         mode,
-        prompt: `Uma pista sobre ${target.name} já foi registrada. Qual decisão evita um chute apressado?`,
-        options: [
-          'Perguntar para separar os candidatos',
-          'Tentar três nomes populares',
-          'Tratar “Não sei” como “Não”',
-        ],
-        correct: 'Perguntar para separar os candidatos',
-        note: 'Palpites consomem ações. Respostas incertas não eliminam candidatos; uma pergunta que divide a base oferece evidência nova.',
+        ...cases[step % cases.length],
       };
     }
+    if (mode === 'split') {
+      const dist = posterior(game, targets, questions);
+      const candidates = ranked
+        .map((r) => ({ ...r, split: separation(dist, targets, r.question) }))
+        .sort((a, b) => b.split - a.split);
+      const selected = [
+        candidates[0],
+        candidates[Math.min(8, candidates.length - 1)],
+        candidates[Math.min(20, candidates.length - 1)],
+      ];
+      return {
+        id: `split:${target.id}`,
+        mode,
+        prompt: `Depois da primeira pista sobre ${target.name}, qual pergunta separa melhor os candidatos ainda plausíveis?`,
+        options: selected.map((r) => r.question.text).sort((a, b) => a.localeCompare(b)),
+        correct: selected[0].question.text,
+        note: `Esta pergunta divide ${Math.round(selected[0].split * 100)}% da massa de pares plausíveis em respostas opostas, segundo as fichas atuais.`,
+      };
+    }
+    const top = ranked.slice(0, 3);
     const options = top
       .map((r) => r.question.text)
       .sort((a, b) => ((a.charCodeAt(0) + step * 7) % 13) - ((b.charCodeAt(0) + step * 7) % 13));
@@ -76,11 +122,9 @@ function getExercise(mode: Exercise['mode'], step: number): Exercise {
       id: `${mode}:${target.id}`,
       mode,
       prompt:
-        mode === 'split'
-          ? `Qual pergunta divide melhor os candidatos após a primeira pista de ${target.name}?`
-          : first?.kind === 'question'
-            ? `Depois de responder “${attribute(target, first.question) === 'yes' ? 'Sim' : attribute(target, first.question) === 'no' ? 'Não' : 'Não sei'}” a “${first.question.text}”, qual pergunta o motor escolheria?`
-            : 'Qual pergunta abre melhor esta base?',
+        first?.kind === 'question'
+          ? `Depois de responder “${firstAnswer === 'yes' ? 'Sim' : firstAnswer === 'no' ? 'Não' : 'Não sei'}” a “${first.question.text}”, qual pergunta o motor escolheria?`
+          : 'Qual pergunta abre melhor esta base?',
       options,
       correct: top[0].question.text,
       note: `A pergunta escolhida separa os candidatos desta base com ganho esperado de ${top[0].gain.toFixed(2)} bits. O caminho pode mudar com outra resposta.`,
@@ -89,7 +133,8 @@ function getExercise(mode: Exercise['mode'], step: number): Exercise {
   const target = targets[((step % 24) * 23 + 3) % targets.length];
   const candidates = questions.filter((q) => !q.applicable || q.applicable.includes(target.type));
   const q = candidates[((step % 24) * 7 + 9) % candidates.length];
-  const correct = attribute(target, q) === 'yes' ? 'Sim' : 'Não';
+  const value = attribute(target, q);
+  const correct = value === 'yes' ? 'Sim' : value === 'no' ? 'Não' : 'Não sei';
   return {
     id: `reading:${q.id}:${target.id}`,
     mode,
