@@ -1,7 +1,9 @@
-const CACHE = 'mestre20-v1';
+const CACHE = 'mestre20-v2';
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(['./', './manifest.webmanifest', './icon.svg'])),
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(['./', './manifest.webmanifest', './icon-192.png', './icon-512.png'])),
   );
   self.skipWaiting();
 });

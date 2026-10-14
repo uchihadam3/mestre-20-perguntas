@@ -7,6 +7,10 @@ import { simulate, type Benchmark } from '../engine/simulate';
 import { badges, finish, load, save, train } from '../persistence/storage';
 
 type Page = 'hub' | 'game' | 'result' | 'academy' | 'book' | 'lab' | 'settings';
+type InstallPrompt = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+};
 type Exercise = {
   id: string;
   mode: 'memory' | 'reading';
@@ -82,9 +86,33 @@ export default function App() {
   const [benchmarks, setBenchmarks] = useState<Benchmark[] | null>(null);
   const [benchmarkBusy, setBenchmarkBusy] = useState(false);
   const [error, setError] = useState('');
+  const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
+  const [installHelp, setInstallHelp] = useState(false);
+  const [installed, setInstalled] = useState(
+    () =>
+      window.matchMedia('(display-mode: standalone)').matches ||
+      Boolean((navigator as Navigator & { standalone?: boolean }).standalone),
+  );
   useEffect(() => {
     save({ version: 1, game, profile });
   }, [game, profile]);
+  useEffect(() => {
+    const onPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPrompt);
+    };
+    const onInstalled = () => {
+      setInstalled(true);
+      setInstallPrompt(null);
+      setInstallHelp(false);
+    };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
   const choice = useMemo(() => (game ? choose(game, targets, questions) : null), [game]);
   const bookChoice = useMemo(() => choose(book, targets, questions), [book]);
   const bookDist = useMemo(() => posterior(book, targets, questions), [book]);
@@ -97,6 +125,16 @@ export default function App() {
     setError('');
     setGame(newGame());
     setPage('game');
+  }
+  async function install() {
+    if (!installPrompt) {
+      setInstallHelp(true);
+      return;
+    }
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    if (choice.outcome === 'accepted') setInstalled(true);
+    setInstallPrompt(null);
   }
   function beep(frequency: number) {
     if (!profile.sound) return;
@@ -214,6 +252,16 @@ export default function App() {
             <span>{hasGame ? 'CONTINUAR PARTIDA' : 'COMEÇAR PARTIDA'}</span>
             <span className="arrow">↗</span>
           </button>
+          {!installed && (
+            <button className="install-banner" onClick={() => void install()}>
+              <span className="install-symbol">↓</span>
+              <span>
+                <b>Instalar no celular</b>
+                <small>Jogue pela tela inicial, até offline</small>
+              </span>
+              <span>›</span>
+            </button>
+          )}
           <div className="progress-block">
             <div className="row spread">
               <span className="eyebrow">POSTO · {rank(profile.xp).toUpperCase()}</span>
@@ -629,6 +677,11 @@ export default function App() {
           <span className="eyebrow gold">SUA EXPERIÊNCIA</span>
           <h1>Configurações.</h1>
           <div className="settings-list">
+            {!installed && (
+              <button className="secondary-button" onClick={() => void install()}>
+                ↓ INSTALAR APLICATIVO
+              </button>
+            )}
             <label>
               <span>
                 <b>Som</b>
@@ -679,6 +732,33 @@ export default function App() {
             </button>
           ))}
         </nav>
+      )}
+      {installHelp && (
+        <div className="install-backdrop" role="presentation" onClick={() => setInstallHelp(false)}>
+          <div
+            className="install-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="install-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="close-button" onClick={() => setInstallHelp(false)} aria-label="Fechar">
+              ×
+            </button>
+            <span className="eyebrow gold">JOGUE COMO APLICATIVO</span>
+            <h2 id="install-title">Instale no seu celular.</h2>
+            <p>
+              <b>Android (Chrome):</b> toque no menu ⋮ e escolha “Instalar aplicativo” ou “Adicionar à tela
+              inicial”.
+            </p>
+            <p>
+              <b>iPhone (Safari):</b> toque em Compartilhar e depois “Adicionar à Tela de Início”.
+            </p>
+            <button className="primary-button" onClick={() => setInstallHelp(false)}>
+              ENTENDI
+            </button>
+          </div>
+        </div>
       )}
     </main>
   );
