@@ -4,7 +4,7 @@ PWA mobile-first de dedução e treino de estratégia, em português brasileiro.
 
 ## Executar
 
-Requer Node 24 e npm. Rode `npm ci` e `npm run dev`; abra o endereço local mostrado pelo Vite no celular na mesma rede ou no navegador do computador. `npm run build` gera o PWA estático em `dist/`; sirva essa pasta por HTTPS ou localhost para instalar e testar o modo offline. Não há deploy público configurado.
+Requer Node 24 e npm. No computador, rode `npm ci` e `npm run dev -- --host 0.0.0.0`; abra no celular o endereço **Network** mostrado pelo Vite, com os dois aparelhos na mesma rede. `npm run build` gera o PWA estático em `dist/`; sirva essa pasta por HTTPS ou localhost para instalar e testar o modo offline. Não há deploy público configurado.
 
 ## Comandos
 
