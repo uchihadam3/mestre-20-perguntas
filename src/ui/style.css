@@ -1244,6 +1244,10 @@ small {
 .install-dialog .primary-button {
   margin-top: 18px;
 }
+.install-browser-link {
+  text-decoration: none;
+  margin-top: 12px;
+}
 @media (prefers-reduced-motion: no-preference) {
   button {
     transition:

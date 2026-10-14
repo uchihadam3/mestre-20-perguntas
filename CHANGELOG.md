@@ -8,3 +8,4 @@
 - Progresso local, missão diária, dois exercícios praticáveis, repetição simples e seis conquistas verificáveis.
 - Testes unitários e workflow CI.
 - Instalação pelo navegador com ícones PNG, instruções Android/iPhone e publicação com acesso à conta do proprietário.
+- Corrigido acesso público ao PWA para permitir ao navegador carregar manifesto, service worker e ícones; orientação para abrir no Chrome quando o link iniciar dentro de outro aplicativo.

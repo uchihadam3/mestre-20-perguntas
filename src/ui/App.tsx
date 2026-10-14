@@ -131,10 +131,15 @@ export default function App() {
       setInstallHelp(true);
       return;
     }
-    await installPrompt.prompt();
-    const choice = await installPrompt.userChoice;
-    if (choice.outcome === 'accepted') setInstalled(true);
-    setInstallPrompt(null);
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === 'accepted') setInstalled(true);
+      setInstallPrompt(null);
+    } catch {
+      setInstallPrompt(null);
+      setInstallHelp(true);
+    }
   }
   function beep(frequency: number) {
     if (!profile.sound) return;
@@ -748,12 +753,24 @@ export default function App() {
             <span className="eyebrow gold">JOGUE COMO APLICATIVO</span>
             <h2 id="install-title">Instale no seu celular.</h2>
             <p>
+              Se o link abriu dentro de outro aplicativo, use a opção <b>Abrir no navegador</b>. Navegadores
+              internos normalmente não permitem instalar.
+            </p>
+            <p>
               <b>Android (Chrome):</b> toque no menu ⋮ e escolha “Instalar aplicativo” ou “Adicionar à tela
               inicial”.
             </p>
             <p>
               <b>iPhone (Safari):</b> toque em Compartilhar e depois “Adicionar à Tela de Início”.
             </p>
+            {/Android/i.test(navigator.userAgent) && (
+              <a
+                className="secondary-button install-browser-link"
+                href={`intent://${window.location.host}${window.location.pathname}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(window.location.href)};end`}
+              >
+                ABRIR NO CHROME ↗
+              </a>
+            )}
             <button className="primary-button" onClick={() => setInstallHelp(false)}>
               ENTENDI
             </button>

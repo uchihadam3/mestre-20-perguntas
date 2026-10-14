@@ -4,10 +4,11 @@ PWA mobile-first de dedução e treino de estratégia, em português brasileiro.
 
 ## Jogar e instalar no celular
 
-Abra [Mestre das 20 Perguntas](https://mestre-20-perguntas.uchihadam.chatgpt.site) no celular. A versão publicada está restrita ao proprietário da conta.
+Abra [Mestre das 20 Perguntas](https://mestre-20-perguntas.uchihadam.chatgpt.site) no celular. O link é público para que o navegador consiga carregar os arquivos necessários à instalação.
 
 - **Android, Chrome:** toque em **Instalar no celular** dentro do jogo. Se o navegador não mostrar o pedido automático, use o menu ⋮ → **Instalar aplicativo** ou **Adicionar à tela inicial**.
 - **iPhone, Safari:** toque em Compartilhar → **Adicionar à Tela de Início**. O botão do jogo também mostra essas instruções.
+- Se o link abrir dentro do navegador de outro aplicativo, use **Abrir no Chrome** no diálogo do jogo ou abra o link diretamente no Chrome/Safari.
 
 É um PWA instalável, sem APK. Depois do primeiro acesso, os arquivos do jogo ficam disponíveis offline no dispositivo; partidas e progresso são guardados nele.
 
