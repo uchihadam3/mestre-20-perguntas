@@ -10,9 +10,23 @@ const epsilon = 1e-12;
 export function prior(targets: Target[], mix = 0.5): Distribution {
   if (mix < 0 || mix > 1) throw new Error('A mistura deve estar entre 0 e 1');
   if (targets.length === 0) return new Map();
-  const scores = targets.map((t) => t.popularity.br);
-  const total = scores.reduce((a, b) => a + b, 0);
-  return new Map(targets.map((t, i) => [t.id, (mix * scores[i]) / total + (1 - mix) / targets.length]));
+  // A larger catalog of US media must not automatically drown out Brazil.
+  // Editorial group weights are uncalibrated; half the prior stays uniform.
+  const group = (t: Target) => (t.origin === 'Brasil' ? 'br' : t.origin === 'EUA' ? 'us' : 'world');
+  const groupWeight = { br: 0.5, us: 0.33, world: 0.17 };
+  const totals = { br: 0, us: 0, world: 0 };
+  for (const t of targets) totals[group(t)] += t.popularity.br;
+  const weightPresent = Object.entries(totals).reduce(
+    (n, [key, total]) => n + (total > 0 ? groupWeight[key as keyof typeof totals] : 0),
+    0,
+  );
+  return new Map(
+    targets.map((t) => [
+      t.id,
+      mix * (groupWeight[group(t)] / weightPresent) * (t.popularity.br / totals[group(t)]) +
+        (1 - mix) / targets.length,
+    ]),
+  );
 }
 
 export function likelihood(target: Target, question: Question, answer: Answer): number {

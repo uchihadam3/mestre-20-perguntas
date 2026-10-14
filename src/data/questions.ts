@@ -298,6 +298,42 @@ export const questions: Question[] = [
     ),
     explicit: true,
   },
+  {
+    ...Q(
+      'nba90s',
+      'Já jogava na NBA antes de 2000?',
+      'nba90s',
+      'Separa gerações de jogadores de basquete.',
+      0.06,
+      0.07,
+      ['real'],
+    ),
+    explicit: true,
+  },
+  {
+    ...Q(
+      'batmanfoe',
+      'É um arqui-inimigo do Batman?',
+      'batmanfoe',
+      'Separa antagonistas centrais de parceiros e aliados.',
+      0.07,
+      0.1,
+      ['fictional'],
+    ),
+    explicit: true,
+  },
+  {
+    ...Q(
+      'spyheroine',
+      'Interpretou uma espiã da Marvel no cinema?',
+      'spyheroine',
+      'Distingue papéis de atrizes nos filmes Marvel.',
+      0.08,
+      0.1,
+      ['real'],
+    ),
+    explicit: true,
+  },
 ];
 
 // Recorte editorial de pistas mais finas. Ausência aqui significa desconhecido,
@@ -379,11 +415,23 @@ const explicitTraits: Record<string, { yes: string[]; no: string[] }> = {
       'Mickey Mouse',
       'Link (Zelda)',
       'Popeye',
+      'Eminem',
+      'Bruno Mars',
     ],
   },
   youngstar: {
     yes: ['Billie Eilish'],
-    no: ['Madonna', 'Taylor Swift', 'Beyoncé', 'Ariana Grande', 'Lady Gaga', 'Rihanna', 'Shakira'],
+    no: [
+      'Madonna',
+      'Taylor Swift',
+      'Beyoncé',
+      'Ariana Grande',
+      'Lady Gaga',
+      'Rihanna',
+      'Shakira',
+      'Eminem',
+      'Bruno Mars',
+    ],
   },
   lakers: { yes: ['Kobe Bryant', 'LeBron James'], no: ['Michael Jordan', 'Stephen Curry'] },
   tvowner: { yes: ['Silvio Santos'], no: ['Faustão', 'Ratinho', 'Ana Maria Braga', 'Luciano Huck', 'Xuxa'] },
@@ -420,13 +468,27 @@ const explicitTraits: Record<string, { yes: string[]; no: string[] }> = {
   bulls: { yes: ['Michael Jordan'], no: ['Kobe Bryant', 'LeBron James', 'Stephen Curry'] },
   novelist: {
     yes: ['Chico Buarque'],
-    no: ['Caetano Veloso', 'Gilberto Gil', 'Roberto Carlos (cantor)', 'Anitta', 'Ivete Sangalo'],
+    no: [
+      'Caetano Veloso',
+      'Gilberto Gil',
+      'Roberto Carlos (cantor)',
+      'Anitta',
+      'Ivete Sangalo',
+      'Gusttavo Lima',
+      'Luan Santana',
+    ],
   },
   marvelheroine: {
     yes: ['Scarlett Johansson', 'Angelina Jolie'],
     no: ['Robert Downey Jr.', 'Tom Cruise'],
   },
   nuclearjob: { yes: ['Homer Simpson'], no: ['Bart Simpson', 'Lisa Simpson'] },
+  nba90s: { yes: ['Kobe Bryant', 'Michael Jordan'], no: ['LeBron James', 'Stephen Curry'] },
+  batmanfoe: { yes: ['Coringa'], no: ['Harley Quinn', 'Batman', 'Mulher-Maravilha'] },
+  spyheroine: {
+    yes: ['Scarlett Johansson'],
+    no: ['Angelina Jolie', 'Jennifer Lawrence', 'Robert Downey Jr.'],
+  },
 };
 
 export function attribute(target: Target, question: Question): 'yes' | 'no' | 'unknown' {

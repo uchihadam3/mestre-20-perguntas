@@ -24,6 +24,18 @@ describe('seed e inferência', () => {
     expect([...p.values()].reduce((a, b) => a + b, 0)).toBeCloseTo(1);
     expect(Math.min(...p.values())).toBeGreaterThan(0);
   });
+  it('peso editorial brasileiro não diminui só porque mais fichas americanas são adicionadas', () => {
+    const editorial = prior(targets, 1);
+    const extra = targets.find((t) => t.origin === 'EUA')!;
+    const expanded = prior([...targets, { ...extra, id: 'extra-us' }], 1);
+    const mass = (dist: Map<string, number>) =>
+      targets.filter((t) => t.origin === 'Brasil').reduce((n, t) => n + (dist.get(t.id) ?? 0), 0);
+    expect(mass(expanded)).toBeCloseTo(mass(editorial));
+    const mixed = prior(targets);
+    expect(mass(mixed)).toBeGreaterThan(
+      targets.filter((t) => t.origin === 'EUA').reduce((n, t) => n + (mixed.get(t.id) ?? 0), 0),
+    );
+  });
   it('respostas sim e não mudam a distribuição em direções opostas', () => {
     const q = questions.find((q) => q.id === 'real')!;
     const seed = prior(targets);
