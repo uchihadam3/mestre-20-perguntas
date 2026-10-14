@@ -13,7 +13,7 @@
 
 - `npm run validate:data`: 197 alvos, 42 perguntas, 0 problemas estruturais.
 - `npm test`: 9 testes passaram; incluem posterior, quatro respostas, rejeição de palpites, 20 ações e recompensas.
-- `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`: passaram localmente. CI remoto ainda precisa executar.
+- `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`: passaram localmente e no [CI remoto](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38532294652).
 - `npm run benchmark`: 12 alvos determinísticos da seed, respostas perfeitas: fixo 8/12, média de 16,13 ações nas vitórias; adaptativo 12/12, média de 9,67. Nenhuma vitória em até 5 neste recorte. Esses números **não** são de pessoas jogando.
 - Teste visual em navegador, Playwright e medições em 320/360/375/390/430 px: **pendentes** porque este ambiente não disponibilizou controle de navegador. Não foram afirmados como aprovados.
 
@@ -34,4 +34,4 @@
 
 ## Git
 
-Branch de trabalho: `feat/primeiro-marco`. PR e commits remotos serão registrados após envio confirmado. A `main` contém apenas o README inicial.
+Branch de trabalho: `feat/primeiro-marco`. [PR #1, em rascunho](https://github.com/uchihadam3/mestre-20-perguntas/pull/1). Commits remotos: [`359b7c2`](https://github.com/uchihadam3/mestre-20-perguntas/commit/359b7c22ff6006e0cf05f2c12ddd5f6c45bbb2a8) (motor e seed) e [`d2537d3`](https://github.com/uchihadam3/mestre-20-perguntas/commit/d2537d3e7069cd89505f4969db7c3e3529a0acef) (interface, PWA e documentação). A `main` contém apenas o README inicial; nenhum deploy foi feito.
