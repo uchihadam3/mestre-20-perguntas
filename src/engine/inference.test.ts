@@ -10,6 +10,8 @@ import {
   posterior,
   prior,
   rankQuestions,
+  shouldGuess,
+  GUESS_POLICY,
   update,
 } from './inference';
 
@@ -74,4 +76,63 @@ describe('seed e inferência', () => {
     expect(answerGame(newGame(), guess, false).status).toBe('playing');
     expect(answerGame(newGame(), guess, true).status).toBe('won');
   });
+  it('não transforma incerteza em sequência de palpites', () => {
+    const realTargets = targets.slice(0, 2);
+    const top = realTargets[0];
+    const probability = (confidence: number) =>
+      new Map([
+        [top.id, confidence],
+        [realTargets[1].id, 1 - confidence],
+      ]);
+    const answers = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        kind: 'answer' as const,
+        questionId: `evidence-${i}`,
+        answer: 'yes' as const,
+      }));
+    const early = { ...newGame('early'), actions: answers(6) };
+    expect(shouldGuess(early, probability(0.98), top)).toBe(false);
+    expect(shouldGuess(early, probability(GUESS_POLICY.earlyThreshold + 0.001), top)).toBe(true);
+
+    const later = { ...newGame('later'), actions: answers(10) };
+    expect(shouldGuess(later, probability(0.85), top)).toBe(false);
+    expect(shouldGuess(later, probability(0.97), top)).toBe(false);
+    expect(shouldGuess(later, probability(0.98), top)).toBe(true);
+
+    // Even a highly confident posterior cannot trigger consecutive name guesses.
+    const missed = { kind: 'guess' as const, targetId: realTargets[1].id, accepted: false };
+    expect(shouldGuess(
+      { ...newGame('cooldown'), actions: [...answers(10), missed, ...answers(2)] },
+      probability(0.999),
+      top,
+    )).toBe(false);
+    expect(shouldGuess(
+      { ...newGame('retry'), actions: [...answers(10), missed, ...answers(4)] },
+      probability(0.996),
+      top,
+    )).toBe(true);
+    expect(shouldGuess(
+      { ...newGame('cap'), actions: [...answers(10), missed, ...answers(4), missed, ...answers(4)] },
+      probability(0.9999),
+      top,
+    )).toBe(false);
+  });
+
+  it('na última ação continua perguntando se não há confiança, sem chute forçado', () => {
+    let game = newGame('last-turn');
+    for (const q of questions.slice(0, 19)) {
+      game = {
+        ...game,
+        actions: [...game.actions, { kind: 'answer', questionId: q.id, answer: 'dont_know' }],
+      };
+    }
+    const decision = choose(game, targets, questions);
+    expect(decision?.kind).toBe('question');
+    if (decision?.kind !== 'question') return;
+    const last = answerGame(game, decision, 'dont_know');
+    expect(last.status).toBe('lost');
+    expect(last.actions.length).toBe(20);
+    expect(last.actions.filter((action) => action.kind === 'guess')).toHaveLength(0);
+  });
+
 });
