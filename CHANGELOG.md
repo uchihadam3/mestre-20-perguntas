@@ -7,3 +7,4 @@
 - Seed editorial de 197 alvos e 42 perguntas, validador estrutural e benchmark reproduzível.
 - Progresso local, missão diária, dois exercícios praticáveis, repetição simples e seis conquistas verificáveis.
 - Testes unitários e workflow CI.
+- Instalação pelo navegador com ícones PNG, instruções Android/iPhone e publicação com acesso à conta do proprietário.

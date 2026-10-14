@@ -8,6 +8,7 @@
 - Seed provisória de 197 alvos e 42 perguntas, checagens estruturais, árvore navegável experimental e laboratório com dois métodos.
 - Treinos de previsão de pergunta e de leitura de ficha, XP por acerto, revisão simples por intervalo, missão diária de três acertos, seis conquistas e histórico local.
 - Manifesto e service worker para instalação/uso offline, após primeiro acesso por HTTPS/localhost.
+- [Versão instalável publicada](https://mestre-20-perguntas.uchihadam.chatgpt.site) com acesso ao proprietário; botão de instalação no Hub e em Configurações, ícones PNG e instruções Android/iPhone.
 
 ## Verificações realizadas
 
@@ -16,6 +17,7 @@
 - `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`: passaram localmente e no [CI remoto](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38532294652).
 - `npm run benchmark`: 12 alvos determinísticos da seed, respostas perfeitas: fixo 8/12, média de 16,00 ações nas vitórias; adaptativo 12/12, média de 9,83. Nenhuma vitória em até 5 neste recorte. Esses números **não** são de pessoas jogando.
 - Teste visual em navegador, Playwright e medições em 320/360/375/390/430 px: **pendentes** porque este ambiente não disponibilizou controle de navegador. Não foram afirmados como aprovados.
+- Publicação do Site confirmada pelo serviço de hospedagem: versão 1, estado `succeeded`, URL acima. O arquivo de publicação contém `index.html`, manifesto, service worker e ícones 192/512.
 
 ## Limites e riscos conhecidos
 
@@ -34,4 +36,4 @@
 
 ## Git
 
-Branch de trabalho: `feat/primeiro-marco`. [PR #1, em rascunho](https://github.com/uchihadam3/mestre-20-perguntas/pull/1). Commits remotos: [`359b7c2`](https://github.com/uchihadam3/mestre-20-perguntas/commit/359b7c22ff6006e0cf05f2c12ddd5f6c45bbb2a8) (motor e seed) e [`d2537d3`](https://github.com/uchihadam3/mestre-20-perguntas/commit/d2537d3e7069cd89505f4969db7c3e3529a0acef) (interface, PWA e documentação). A `main` contém apenas o README inicial; nenhum deploy foi feito.
+Branch de trabalho: `feat/primeiro-marco`. [PR #1, em rascunho](https://github.com/uchihadam3/mestre-20-perguntas/pull/1). A `main` contém apenas o README inicial. O PWA foi publicado em Sites a partir do mesmo código da branch; o projeto de hospedagem tem seu próprio registro de versão.
