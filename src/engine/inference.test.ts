@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { targets } from '../data/targets';
 import { questions, attribute } from '../data/questions';
 import { validateData } from '../data/validate';
-import { isQuestionAllowed, logicalFacts } from './logic';
+import { analyzeFacts, isQuestionAllowed, logicalFacts } from './logic';
 import {
   answerGame,
   choose,
@@ -12,6 +12,7 @@ import {
   posterior,
   prior,
   rankQuestions,
+  reviseAnswer,
   separation,
   shouldGuess,
   GUESS_POLICY,
@@ -229,7 +230,8 @@ describe('seed e inferência', () => {
     expect(ids).toContain('animatedfilm');
     const dist = posterior(game, targets, questions);
     expect(dist.get(targets.find((target) => target.name === 'Shrek')!.id)).toBeGreaterThan(0);
-    expect(dist.get(targets.find((target) => target.name === 'Goku')!.id)).toBe(0);
+    // Anime and western cartoons may overlap through adaptations: not a hard elimination.
+    expect(dist.get(targets.find((target) => target.name === 'Goku')!.id)).toBeGreaterThan(0);
     const subtype = questions.find((question) => question.id === 'animatedfilm')!;
     expect(
       attribute(
@@ -313,5 +315,34 @@ describe('seed e inferência', () => {
     ).toBe(true);
     const dist = posterior(game, targets, questions);
     expect(dist.get(targets.find((t) => t.name === 'Pelé')!.id)).toBeGreaterThan(0);
+  });
+
+  it('detecta contradição de país e pausa até revisar uma resposta sem manter ações posteriores', () => {
+    const game = {
+      ...newGame('contradiction'),
+      actions: [
+        { kind: 'answer' as const, questionId: 'us', answer: 'yes' as const },
+        { kind: 'answer' as const, questionId: 'br', answer: 'yes' as const },
+        { kind: 'answer' as const, questionId: 'woman', answer: 'maybe' as const },
+      ],
+    };
+    expect(analyzeFacts(game).conflict).toBe(1);
+    expect(choose(game, targets, questions)).toBeNull();
+    const corrected = reviseAnswer(game, 0, 'dont_know');
+    expect(corrected.actions).toEqual([{ kind: 'answer', questionId: 'us', answer: 'dont_know' }]);
+    expect(analyzeFacts(corrected).conflict).toBeNull();
+    expect(choose(corrected, targets, questions)?.kind).toBe('question');
+  });
+
+  it('mídias sobrepostas não são contradições determinísticas', () => {
+    const game = {
+      ...newGame('overlap'),
+      actions: [
+        { kind: 'answer' as const, questionId: 'cartoon', answer: 'yes' as const },
+        { kind: 'answer' as const, questionId: 'anime', answer: 'yes' as const },
+      ],
+    };
+    expect(analyzeFacts(game).conflict).toBeNull();
+    expect(logicalFacts(game).get('fictional')).toBe(true);
   });
 });

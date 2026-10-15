@@ -11,8 +11,10 @@ import {
   newGame,
   posterior,
   rankQuestions,
+  reviseAnswer,
   separation,
 } from '../engine/inference';
+import { analyzeFacts } from '../engine/logic';
 import { simulate, type Benchmark } from '../engine/simulate';
 import { badges, finish, load, mastery, save, train } from '../persistence/storage';
 
@@ -240,6 +242,7 @@ export default function App() {
     };
   }, []);
   const choice = useMemo(() => (game ? choose(game, targets, questions) : null), [game]);
+  const factReport = useMemo(() => (game ? analyzeFacts(game) : null), [game]);
   const bookChoice = useMemo(() => choose(book, targets, questions), [book]);
   const bookDist = useMemo(() => posterior(book, targets, questions), [book]);
   const caseFile = useMemo(() => {
@@ -517,7 +520,42 @@ export default function App() {
               </div>
             ))}
           </div>
-          {choice ? (
+          {factReport?.conflict !== null && factReport?.conflict !== undefined ? (
+            <div className="question-panel review-panel" role="alert">
+              <span className="eyebrow gold">PISTAS EM CONFLITO</span>
+              <h2>Vamos conferir uma resposta.</h2>
+              <p>
+                A resposta sobre “{questions.find((q) => q.id === factReport.reason)?.text ?? 'esta pista'}”
+                contradiz uma pista anterior. Escolha uma resposta para corrigir; as ações posteriores serão
+                refeitas sem gastar o limite.
+              </p>
+              <div className="review-list">
+                {game.actions.map((action, index) =>
+                  action.kind === 'answer' && (action.answer === 'yes' || action.answer === 'no') ? (
+                    <details key={index} open={index === factReport.conflict}>
+                      <summary>
+                        {questions.find((q) => q.id === action.questionId)?.text ?? action.questionId}
+                      </summary>
+                      <div className="review-options">
+                        {answers.map((option) => (
+                          <button
+                            key={option.value}
+                            aria-label={`Corrigir resposta para ${option.label}`}
+                            onClick={() => {
+                              setGame(reviseAnswer(game, index, option.value));
+                              setFeedback('Pista revisada · investigação retomada');
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null,
+                )}
+              </div>
+            </div>
+          ) : choice ? (
             <>
               <div className="question-panel">
                 <span className="question-crest">{choice.kind === 'guess' ? '✦' : '◇'}</span>
@@ -540,6 +578,16 @@ export default function App() {
                     ? 'Só tento um nome quando a evidência é muito forte. Confirme se acertei.'
                     : 'Sem nomes aleatórios: primeiro vou eliminar possibilidades com suas respostas.'}
                 </p>
+                {choice.kind === 'question' && (
+                  <details className="clue-reason">
+                    <summary>Por que esta pergunta?</summary>
+                    <p>
+                      Ela distingue respostas diferentes entre candidatos ainda plausíveis. Ganho estimado:{' '}
+                      {choice.gain.toFixed(2)} bits nesta base experimental. Pistas já deduzidas não são
+                      perguntadas novamente.
+                    </p>
+                  </details>
+                )}
               </div>
               {choice.kind === 'question' ? (
                 <div className="answer-grid">

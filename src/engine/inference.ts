@@ -1,6 +1,6 @@
 import type { Answer, Game, Question, Target } from '../domain/types';
 import { attribute } from '../data/questions';
-import { CERTAIN_CLASSIFICATIONS, isQuestionAllowed } from './logic';
+import { analyzeFacts, CERTAIN_CLASSIFICATIONS, isQuestionAllowed } from './logic';
 
 export type Distribution = Map<string, number>;
 export type Choice =
@@ -140,6 +140,7 @@ export function rankQuestions(
   targets: Target[],
   questions: Question[],
 ): { question: Question; gain: number; score: number }[] {
+  if (analyzeFacts(game).conflict !== null) return [];
   const dist = posterior(game, targets, questions);
   const used = new Set(game.actions.filter((a) => a.kind === 'answer').map((a) => a.questionId));
   const byId = new Map(targets.map((t) => [t.id, t]));
@@ -225,7 +226,13 @@ export function shouldGuess(game: Game, dist: Distribution, top: Target): boolea
 }
 
 export function choose(game: Game, targets: Target[], questions: Question[]): Choice | null {
-  if (game.status !== 'playing' || game.actions.length >= 20 || !targets.length) return null;
+  if (
+    game.status !== 'playing' ||
+    game.actions.length >= 20 ||
+    !targets.length ||
+    analyzeFacts(game).conflict !== null
+  )
+    return null;
   const dist = posterior(game, targets, questions);
   const [top] = targets
     .filter((t) => !game.actions.some((a) => a.kind === 'guess' && a.targetId === t.id))
@@ -259,6 +266,18 @@ export function answerGame(game: Game, choice: Choice, answer: Answer | boolean)
     status: won ? 'won' : actions.length === 20 ? 'lost' : 'playing',
     endedAt: won || actions.length === 20 ? Date.now() : undefined,
     lastGuess: action.kind === 'guess' ? action.targetId : game.lastGuess,
+  };
+}
+
+/** Editing an earlier clue invalidates all later deductions and returns their
+ * action budget. Previous guesses must never be kept after the edit. */
+export function reviseAnswer(game: Game, index: number, answer: Answer): Game {
+  const action = game.actions[index];
+  if (game.status !== 'playing' || action?.kind !== 'answer') return game;
+  return {
+    ...game,
+    actions: [...game.actions.slice(0, index), { ...action, answer }],
+    lastGuess: undefined,
   };
 }
 
