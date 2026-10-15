@@ -243,6 +243,20 @@ export default function App() {
   }, []);
   const choice = useMemo(() => (game ? choose(game, targets, questions) : null), [game]);
   const factReport = useMemo(() => (game ? analyzeFacts(game) : null), [game]);
+  const rationale = useMemo(() => {
+    if (!game || choice?.kind !== 'question') return null;
+    const dist = posterior(game, targets, questions);
+    const plausible = [...targets]
+      .filter((target) => (dist.get(target.id) ?? 0) > 0.001)
+      .sort((a, b) => (dist.get(b.id) ?? 0) - (dist.get(a.id) ?? 0));
+    const yes = plausible.find((target) => attribute(target, choice.question) === 'yes');
+    const no = plausible.find((target) => attribute(target, choice.question) === 'no');
+    const unknown = plausible.find((target) => attribute(target, choice.question) === 'unknown');
+    if (yes && no) return `${yes.name} tem “Sim” e ${no.name} tem “Não” nas fichas.`;
+    if (yes && unknown)
+      return `${yes.name} tem “Sim”; ${unknown.name} ainda está sem anotação. Sua resposta ajuda a separar essas possibilidades.`;
+    return 'Esta pista compara respostas diferentes entre as fichas mais plausíveis.';
+  }, [game, choice]);
   const bookChoice = useMemo(() => choose(book, targets, questions), [book]);
   const bookDist = useMemo(() => posterior(book, targets, questions), [book]);
   const caseFile = useMemo(() => {
@@ -582,9 +596,8 @@ export default function App() {
                   <details className="clue-reason">
                     <summary>Por que esta pergunta?</summary>
                     <p>
-                      Ela distingue respostas diferentes entre candidatos ainda plausíveis. Ganho estimado:{' '}
-                      {choice.gain.toFixed(2)} bits nesta base experimental. Pistas já deduzidas não são
-                      perguntadas novamente.
+                      {rationale} Ganho estimado: {choice.gain.toFixed(2)} bits nesta base experimental.
+                      Pistas já deduzidas não são perguntadas novamente.
                     </p>
                   </details>
                 )}

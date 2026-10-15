@@ -1,8 +1,8 @@
 import { targets } from './targets';
-import { attribute, questions } from './questions';
+import { attribute, questions, validateTraitEvidence } from './questions';
 
 export function validateData(): string[] {
-  const issues: string[] = [];
+  const issues: string[] = validateTraitEvidence(targets);
   if (targets.length < 150) issues.push(`A seed tem apenas ${targets.length} alvos`);
   if (questions.length < 35) issues.push(`O catálogo tem apenas ${questions.length} perguntas`);
   const unique = (items: string[], label: string) => {
@@ -31,7 +31,8 @@ export function validateData(): string[] {
   }
   for (const q of questions) {
     const values = targets.map((t) => attribute(t, q));
-    if (!values.includes('yes') || !values.includes('no')) issues.push(`Pergunta sem divisão: ${q.id}`);
+    if (!values.includes('yes') || (!values.includes('no') && !values.includes('unknown')))
+      issues.push(`Pergunta sem divisão: ${q.id}`);
     if (q.unknownRate < 0 || q.unknownRate >= 1 || q.cost < 0) issues.push(`Parâmetros inválidos: ${q.id}`);
   }
   return issues;

@@ -38,6 +38,10 @@ const IMPLIES: Readonly<Record<string, readonly string[]>> = {
   relativity: ['science', 'real'],
   marvelheroine: ['marvel', 'real'],
   spyheroine: ['marvelheroine', 'marvel', 'real'],
+  blackwidow: ['spyheroine', 'marvelheroine', 'marvel', 'real'],
+  santosclub: ['football', 'sport', 'real'],
+  barbiesong: ['music', 'real'],
+  construcao: ['music', 'real'],
 };
 
 const ONLY_AFTER_YES: Readonly<Record<string, string>> = {

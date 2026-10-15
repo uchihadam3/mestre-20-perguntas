@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { targets } from '../data/targets';
-import { questions, attribute } from '../data/questions';
+import { questions, attribute, attributeEvidence } from '../data/questions';
 import { validateData } from '../data/validate';
 import { analyzeFacts, isQuestionAllowed, logicalFacts } from './logic';
 import {
@@ -344,5 +344,111 @@ describe('seed e inferência', () => {
     };
     expect(analyzeFacts(game).conflict).toBeNull();
     expect(logicalFacts(game).get('fictional')).toBe(true);
+    const crossMedia = {
+      ...newGame('game-anime'),
+      actions: [
+        { kind: 'answer' as const, questionId: 'game', answer: 'yes' as const },
+        { kind: 'answer' as const, questionId: 'anime', answer: 'yes' as const },
+      ],
+    };
+    expect(analyzeFacts(crossMedia).conflict).toBeNull();
+    expect(
+      attribute(
+        targets.find((t) => t.name === 'Pikachu')!,
+        questions.find((q) => q.id === 'game')!,
+      ),
+    ).toBe('yes');
+    const impossibleType = {
+      ...newGame('type'),
+      actions: [
+        { kind: 'answer' as const, questionId: 'real', answer: 'yes' as const },
+        { kind: 'answer' as const, questionId: 'group', answer: 'yes' as const },
+      ],
+    };
+    expect(analyzeFacts(impossibleType).conflict).toBe(1);
+  });
+
+  it('catálogo não inventa não para tags ausentes', () => {
+    const pele = targets.find((t) => t.name === 'Pelé')!;
+    const music = questions.find((q) => q.id === 'music')!;
+    const real = questions.find((q) => q.id === 'real')!;
+    const japan = questions.find((q) => q.id === 'jp')!;
+    expect(attribute(pele, music)).toBe('unknown');
+    expect(attribute(pele, real)).toBe('yes');
+    expect(attribute(pele, japan)).toBe('no');
+    const threecups = questions.find((q) => q.id === 'threecups')!;
+    expect(attributeEvidence(pele, threecups)).toMatchObject({ value: 'yes', confidence: 'curated' });
+    expect(attributeEvidence(pele, music)).toEqual({ value: 'unknown', source: null, confidence: 'unknown' });
+    for (const target of targets) {
+      for (const question of questions) {
+        if (
+          !question.explicit &&
+          !target.tags.includes(question.tag) &&
+          !['real', 'fictional', 'group', 'br', 'us', 'jp', 'uk', 'mx'].includes(question.tag)
+        ) {
+          expect(attribute(target, question)).not.toBe('no');
+        }
+      }
+    }
+  });
+
+  it('respostas definitivas implicadas são puladas, mesmo após caminhos diferentes', () => {
+    for (const pair of [
+      ['football', 'sport'],
+      ['lakers', 'basket'],
+      ['nuclearjob', 'simpsons'],
+      ['spyheroine', 'marvelheroine'],
+    ]) {
+      const game = {
+        ...newGame(pair[0]),
+        actions: [{ kind: 'answer' as const, questionId: pair[0], answer: 'yes' as const }],
+      };
+      expect(logicalFacts(game).get(pair[1])).toBe(true);
+      expect(rankQuestions(game, targets, questions).map((r) => r.question.id)).not.toContain(pair[1]);
+    }
+    const uncertain = {
+      ...newGame('uncertain'),
+      actions: [{ kind: 'answer' as const, questionId: 'football', answer: 'maybe' as const }],
+    };
+    expect(logicalFacts(uncertain).has('sport')).toBe(false);
+  });
+
+  it('remove uma pergunta dominada com a mesma assinatura de respostas', () => {
+    const original = questions.find((q) => q.id === 'sport')!;
+    const duplicate = { ...original, id: 'sport-duplicada', cost: original.cost + 0.2 };
+    const ranked = rankQuestions(newGame('dominated'), targets, [original, duplicate]);
+    expect(ranked.map((entry) => entry.question.id)).toEqual(['sport']);
+  });
+
+  it('não arrisca nome quando dois alvos têm assinatura idêntica', () => {
+    const twin = {
+      ...targets[0],
+      id: 'clone',
+      name: 'Clone da ficha',
+      popularity: { ...targets[0].popularity },
+    };
+    let game = newGame('twins');
+    for (let i = 0; i < 20; i++) {
+      const choice = choose(game, [targets[0], twin], questions);
+      if (!choice) break;
+      expect(choice.kind).toBe('question');
+      if (choice.kind !== 'question') break;
+      const answer = attribute(targets[0], choice.question);
+      game = answerGame(game, choice, answer === 'unknown' ? 'dont_know' : answer);
+    }
+    expect(game.actions.every((action) => action.kind === 'answer')).toBe(true);
+  });
+
+  it('um alvo fora da base pode encerrar sem nome inventado', () => {
+    let game = newGame('unknown-target');
+    while (game.status === 'playing') {
+      const choice = choose(game, targets, questions);
+      if (!choice) break;
+      expect(choice.kind).toBe('question');
+      if (choice.kind === 'question') game = answerGame(game, choice, 'dont_know');
+    }
+    expect(game.actions.length).toBeLessThanOrEqual(20);
+    expect(game.actions.some((action) => action.kind === 'guess')).toBe(false);
+    if (game.status === 'playing') expect(concedeGame(game).status).toBe('lost');
   });
 });
