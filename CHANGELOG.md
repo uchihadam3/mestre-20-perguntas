@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — Laboratório Autônomo experimental
+
+- Simulador de partidas completas com coortes de treino, validação e holdout, cenários de lacunas, dúvida, ruído e alvo fora da base; orçamento de CPU e seeds reproduzíveis.
+- Comparação de roteiro fixo, divisão conhecida, política publicada, busca de dois passos e árvore de abertura. Relatórios JSON/Markdown, grupos indistinguíveis e portão de regressão.
+- CI com relatório reduzido e workflow diário/manual com artefatos. Resultados versionados no Laboratório do jogo; estratégia da partida/Livro permanece aprovada separadamente.
+- A versão PWA usa cache `mestre20-v8`. Validação de instalação em aparelho real ainda pendente.
+
 ## 0.2.0 — inteligência V2 experimental
 
 - Taxonomia explícita, respostas desconhecidas sem negativas implícitas e correção de respostas contraditórias.

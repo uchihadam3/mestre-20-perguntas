@@ -6,3 +6,5 @@ test-results/
 .DS_Store
 *.local
 *.tsbuildinfo
+reports/ci.json
+reports/ci.md

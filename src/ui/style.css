@@ -1160,6 +1160,94 @@ small {
   font-size: 39px;
   color: #dfc484;
 }
+.lab-discovery {
+  margin: 16px 0;
+  padding: 17px;
+  border: 1px solid #e4c98991;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, #74604755, transparent 56%), linear-gradient(140deg, #29365a, #141d36);
+  box-shadow:
+    0 16px 35px #050b2033,
+    inset 0 1px #fff2;
+}
+.lab-discovery h2 {
+  margin: 10px 0 8px;
+  font:
+    22px/1.18 Georgia,
+    serif;
+  color: #f4dc9e;
+}
+.lab-discovery p {
+  color: #c9d4e3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.lab-branches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin: 14px 0;
+}
+.lab-branches button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 2px;
+  border: 1px solid #8da2bd8c;
+  border-radius: 9px;
+  background: #172644;
+  color: #d5deed;
+  font-size: 11px;
+}
+.lab-branches button.active {
+  border-color: #e9c67c;
+  background: #59482c;
+  color: #ffedc1;
+}
+.lab-followup {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 11px;
+  background: #0b1731a8;
+}
+.lab-followup small,
+.lab-metrics small {
+  color: #d5ba79;
+  font-size: 9px;
+  letter-spacing: 0.09em;
+}
+.lab-followup strong {
+  font:
+    16px/1.3 Georgia,
+    serif;
+  color: #f0e8d7;
+}
+.lab-followup span {
+  color: #aabbd1;
+  font-size: 11px;
+}
+.lab-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.lab-metrics div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  text-align: center;
+  padding: 10px 4px;
+  border: 1px solid #bca46a59;
+  border-radius: 10px;
+  background: #1b2845;
+}
+.lab-metrics b {
+  color: #f1d795;
+  font:
+    19px Georgia,
+    serif;
+}
 .lab-intro div {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-const CACHE = 'mestre20-v7';
+const CACHE = 'mestre20-v8';
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches
