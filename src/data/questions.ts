@@ -43,6 +43,15 @@ export const questions: Question[] = [
     0.1,
   ),
   Q('cartoon', 'É de um desenho animado ocidental?', 'cartoon', 'Isola animações fora do anime.', 0.04, 0.05),
+  Q(
+    'animatedfilm',
+    'É principalmente de um filme de animação, em vez de um desenho de TV?',
+    'animatedfilm',
+    'Refina o ramo de cartoons: diferencia longas animados de desenhos de TV.',
+    0.05,
+    0.07,
+    ['fictional'],
+  ),
   Q('anime', 'É de anime ou mangá?', 'anime', 'Divide o ramo de animação japonesa.', 0.04, 0.04),
   Q('game', 'É associado a videogames?', 'game', 'Divide personagens e criadores de jogos.', 0.04, 0.07),
   Q(
@@ -493,6 +502,12 @@ const explicitTraits: Record<string, { yes: string[]; no: string[] }> = {
 
 export function attribute(target: Target, question: Question): 'yes' | 'no' | 'unknown' {
   if (question.applicable && !question.applicable.includes(target.type)) return 'unknown';
+  if (question.tag === 'animatedfilm') {
+    // Only ask this inside the western-animation branch. An animated feature
+    // can be both a cartoon AND a film; there is no blanket contradiction.
+    if (!target.tags.includes('cartoon')) return 'unknown';
+    return target.tags.includes('film') ? 'yes' : 'no';
+  }
   if (question.explicit) {
     const trait = explicitTraits[question.tag];
     if (trait?.yes.includes(target.name)) return 'yes';
