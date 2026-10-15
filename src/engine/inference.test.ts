@@ -227,8 +227,18 @@ describe('seed e inferência', () => {
     expect(dist.get(targets.find((target) => target.name === 'Shrek')!.id)).toBeGreaterThan(0);
     expect(dist.get(targets.find((target) => target.name === 'Goku')!.id)).toBe(0);
     const subtype = questions.find((question) => question.id === 'animatedfilm')!;
-    expect(attribute(targets.find((target) => target.name === 'Shrek')!, subtype)).toBe('yes');
-    expect(attribute(targets.find((target) => target.name === 'Homer Simpson')!, subtype)).toBe('no');
+    expect(
+      attribute(
+        targets.find((target) => target.name === 'Shrek')!,
+        subtype,
+      ),
+    ).toBe('yes');
+    expect(
+      attribute(
+        targets.find((target) => target.name === 'Homer Simpson')!,
+        subtype,
+      ),
+    ).toBe('no');
   });
 
   it('deduz perguntas-pai e evita perguntas sobre tipo de alvo incompatível', () => {
@@ -238,15 +248,45 @@ describe('seed e inferência', () => {
     });
     const football = withAnswer('football', 'yes');
     expect(logicalFacts(football).get('sport')).toBe(true);
-    expect(isQuestionAllowed(football, questions.find((q) => q.id === 'sport')!)).toBe(false);
+    expect(
+      isQuestionAllowed(
+        football,
+        questions.find((q) => q.id === 'sport')!,
+      ),
+    ).toBe(false);
     const notSport = withAnswer('sport', 'no');
-    expect(isQuestionAllowed(notSport, questions.find((q) => q.id === 'football')!)).toBe(false);
-    expect(isQuestionAllowed(notSport, questions.find((q) => q.id === 'basket')!)).toBe(false);
+    expect(
+      isQuestionAllowed(
+        notSport,
+        questions.find((q) => q.id === 'football')!,
+      ),
+    ).toBe(false);
+    expect(
+      isQuestionAllowed(
+        notSport,
+        questions.find((q) => q.id === 'basket')!,
+      ),
+    ).toBe(false);
     const real = withAnswer('real', 'yes');
-    expect(isQuestionAllowed(real, questions.find((q) => q.id === 'animal')!)).toBe(false);
-    expect(isQuestionAllowed(real, questions.find((q) => q.id === 'hero')!)).toBe(false);
+    expect(
+      isQuestionAllowed(
+        real,
+        questions.find((q) => q.id === 'animal')!,
+      ),
+    ).toBe(false);
+    expect(
+      isQuestionAllowed(
+        real,
+        questions.find((q) => q.id === 'hero')!,
+      ),
+    ).toBe(false);
     const group = withAnswer('group', 'yes');
-    expect(isQuestionAllowed(group, questions.find((q) => q.id === 'real')!)).toBe(false);
+    expect(
+      isQuestionAllowed(
+        group,
+        questions.find((q) => q.id === 'real')!,
+      ),
+    ).toBe(false);
   });
 
   it('incerteza não elimina países nem transforma hipóteses em fatos', () => {
@@ -255,10 +295,19 @@ describe('seed e inferência', () => {
       actions: [{ kind: 'answer' as const, questionId: 'us', answer: 'maybe' as const }],
     };
     expect(logicalFacts(game).size).toBe(0);
-    expect(isQuestionAllowed(game, questions.find((q) => q.id === 'br')!)).toBe(true);
-    expect(isQuestionAllowed(game, questions.find((q) => q.id === 'jp')!)).toBe(true);
+    expect(
+      isQuestionAllowed(
+        game,
+        questions.find((q) => q.id === 'br')!,
+      ),
+    ).toBe(true);
+    expect(
+      isQuestionAllowed(
+        game,
+        questions.find((q) => q.id === 'jp')!,
+      ),
+    ).toBe(true);
     const dist = posterior(game, targets, questions);
     expect(dist.get(targets.find((t) => t.name === 'Pelé')!.id)).toBeGreaterThan(0);
   });
-
 });

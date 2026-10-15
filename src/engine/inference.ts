@@ -69,7 +69,8 @@ function constrainCertainAnswers(
       action.kind !== 'answer' ||
       (action.answer !== 'yes' && action.answer !== 'no') ||
       !CERTAIN_CLASSIFICATIONS.has(action.questionId)
-    ) return [];
+    )
+      return [];
     const question = questions.find((item) => item.id === action.questionId);
     return question ? [{ question, answer: action.answer }] : [];
   });
@@ -142,26 +143,31 @@ export function rankQuestions(
   const dist = posterior(game, targets, questions);
   const used = new Set(game.actions.filter((a) => a.kind === 'answer').map((a) => a.questionId));
   const byId = new Map(targets.map((t) => [t.id, t]));
-  return questions
-    .filter((q) => !used.has(q.id) && isQuestionAllowed(game, q))
-    .map((question) => {
-      const gain = informationGain(dist, targets, question);
-      const applicableMass = [...dist].reduce(
-        (n, [id, p]) =>
-          n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
-        0,
-      );
-      const split = separation(dist, targets, question);
-      return {
-        question,
-        gain,
-        score:
-          gain * (0.55 + 0.45 * applicableMass) + 0.35 * split - question.cost - question.unknownRate * 0.25,
-      };
-    })
-    // Don't ask questions that cannot split any remaining plausible rivals.
-    .filter(({ question }) => separation(dist, targets, question) > epsilon)
-    .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
+  return (
+    questions
+      .filter((q) => !used.has(q.id) && isQuestionAllowed(game, q))
+      .map((question) => {
+        const gain = informationGain(dist, targets, question);
+        const applicableMass = [...dist].reduce(
+          (n, [id, p]) =>
+            n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
+          0,
+        );
+        const split = separation(dist, targets, question);
+        return {
+          question,
+          gain,
+          score:
+            gain * (0.55 + 0.45 * applicableMass) +
+            0.35 * split -
+            question.cost -
+            question.unknownRate * 0.25,
+        };
+      })
+      // Don't ask questions that cannot split any remaining plausible rivals.
+      .filter(({ question }) => separation(dist, targets, question) > epsilon)
+      .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id))
+  );
 }
 
 /**

@@ -56,9 +56,16 @@ const TOO_BROAD_AFTER_YES: Readonly<Record<string, readonly string[]>> = {
 };
 
 export const CERTAIN_CLASSIFICATIONS = new Set([
-  'real', 'fictional', 'group',
-  'br', 'us', 'jp', 'uk', 'mx',
-  'cartoon', 'anime',
+  'real',
+  'fictional',
+  'group',
+  'br',
+  'us',
+  'jp',
+  'uk',
+  'mx',
+  'cartoon',
+  'anime',
 ]);
 
 export function logicalFacts(game: Game): Map<string, boolean> {
@@ -105,7 +112,8 @@ export function isQuestionAllowed(game: Game, question: Question): boolean {
     Object.entries(TOO_BROAD_AFTER_YES).some(
       ([answered, blocked]) => facts.get(answered) === true && blocked.includes(question.id),
     )
-  ) return false;
+  )
+    return false;
   if (question.applicable?.every((type) => facts.get(type) === false)) return false;
   return true;
 }
