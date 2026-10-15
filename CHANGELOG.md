@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — inteligência V2 experimental
+
+- Taxonomia explícita, respostas desconhecidas sem negativas implícitas e correção de respostas contraditórias.
+- Perguntas redundantes/dominadas são descartadas e o ganho mínimo é aplicado antes do ranking; quatro novas pistas com fontes primárias.
+- Base de 203 alvos e 65 perguntas; 30 testes e benchmark de partidas completas.
+- Publicada como versão 6 do Site público, com cache PWA `mestre20-v7`. A instalação em aparelho real ainda precisa ser testada.
+
 ## 0.1.0 — primeiro marco experimental
 
 - PWA responsivo com Hub, duelo, resultado, Academia, Livro Mestre, Laboratório e configurações.

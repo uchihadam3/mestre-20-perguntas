@@ -11,8 +11,6 @@ const EXCLUSIVE_FAMILIES: readonly (readonly string[])[] = [
   ['real', 'fictional', 'group'],
   // Country of origin of the person or work (not fictional nationality).
   ['br', 'us', 'jp', 'uk', 'mx'],
-  // Western animation and Japanese anime/manga as origin classifications.
-  ['cartoon', 'anime'],
 ];
 
 const IMPLIES: Readonly<Record<string, readonly string[]>> = {
@@ -38,8 +36,12 @@ const IMPLIES: Readonly<Record<string, readonly string[]>> = {
   letterr: ['fictional'],
   nuclearjob: ['simpsons', 'fictional'],
   relativity: ['science', 'real'],
-  marvelheroine: ['marvel', 'film', 'real'],
-  spyheroine: ['marvel', 'film', 'real'],
+  marvelheroine: ['marvel', 'real'],
+  spyheroine: ['marvelheroine', 'marvel', 'real'],
+  blackwidow: ['spyheroine', 'marvelheroine', 'marvel', 'real'],
+  santosclub: ['football', 'sport', 'real'],
+  barbiesong: ['music', 'real'],
+  construcao: ['music', 'real'],
 };
 
 const ONLY_AFTER_YES: Readonly<Record<string, string>> = {
@@ -51,60 +53,68 @@ const ONLY_AFTER_YES: Readonly<Record<string, string>> = {
 // The broad film/series questions would, however, sound like starting over.
 // Offer a more precise animated-film follow-up instead.
 const TOO_BROAD_AFTER_YES: Readonly<Record<string, readonly string[]>> = {
-  cartoon: ['film', 'series', 'novela'],
-  anime: ['film', 'series', 'novela'],
+  cartoon: ['anime', 'film', 'series', 'novela'],
+  anime: ['cartoon', 'film', 'series', 'novela'],
 };
 
-export const CERTAIN_CLASSIFICATIONS = new Set([
-  'real',
-  'fictional',
-  'group',
-  'br',
-  'us',
-  'jp',
-  'uk',
-  'mx',
-  'cartoon',
-  'anime',
-]);
+export const CERTAIN_CLASSIFICATIONS = new Set(['real', 'fictional', 'group', 'br', 'us', 'jp', 'uk', 'mx']);
 
-export function logicalFacts(game: Game): Map<string, boolean> {
+export type FactReport = { facts: Map<string, boolean>; conflict: number | null; reason: string | null };
+
+/** Each fact retains the answer that established it, including implications.
+ * Overlapping media are never made mutually exclusive. A conflict suspends
+ * decisions until the player edits an answer. */
+export function analyzeFacts(game: Game): FactReport {
   const facts = new Map<string, boolean>();
-  for (const action of game.actions) {
+  const source = new Map<string, number>();
+  let conflict: number | null = null;
+  let reason: string | null = null;
+  const assign = (id: string, value: boolean, index: number) => {
+    if (facts.has(id)) {
+      if (facts.get(id) !== value && conflict === null) {
+        conflict = index;
+        reason = id;
+      }
+      return false;
+    }
+    facts.set(id, value);
+    source.set(id, index);
+    return true;
+  };
+  for (const [index, action] of game.actions.entries()) {
     if (action.kind !== 'answer' || (action.answer !== 'yes' && action.answer !== 'no')) continue;
-    facts.set(action.questionId, action.answer === 'yes');
-  }
-
-  // Compute implications and their contrapositives to a fixed point.
-  // A contradiction in previously stored responses does not erase history;
-  // the UI needs to offer undo/correction, rather than asking more guesses.
-  let changed = true;
-  while (changed) {
-    changed = false;
-    const assign = (id: string, value: boolean) => {
-      if (facts.has(id)) return;
-      facts.set(id, value);
-      changed = true;
-    };
-    for (const [id, yes] of [...facts]) {
-      if (yes) {
-        for (const family of EXCLUSIVE_FAMILIES) {
-          if (family.includes(id)) for (const sibling of family) if (sibling !== id) assign(sibling, false);
-        }
-        for (const parent of IMPLIES[id] ?? []) assign(parent, true);
-      } else {
-        // If A implies B, then "no B" implies "no A".
-        for (const [child, parents] of Object.entries(IMPLIES)) {
-          if (parents.includes(id)) assign(child, false);
+    assign(action.questionId, action.answer === 'yes', index);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const [id, yes] of [...facts]) {
+        const origin = source.get(id) ?? index;
+        if (yes) {
+          for (const family of EXCLUSIVE_FAMILIES) {
+            if (family.includes(id))
+              for (const sibling of family)
+                if (sibling !== id) changed = assign(sibling, false, origin) || changed;
+          }
+          for (const parent of IMPLIES[id] ?? []) changed = assign(parent, true, origin) || changed;
+        } else {
+          // If A implies B, then "no B" implies "no A".
+          for (const [child, parents] of Object.entries(IMPLIES)) {
+            if (parents.includes(id)) changed = assign(child, false, origin) || changed;
+          }
         }
       }
     }
   }
-  return facts;
+  return { facts, conflict, reason };
+}
+
+export function logicalFacts(game: Game): Map<string, boolean> {
+  return analyzeFacts(game).facts;
 }
 
 export function isQuestionAllowed(game: Game, question: Question): boolean {
-  const facts = logicalFacts(game);
+  const { facts, conflict } = analyzeFacts(game);
+  if (conflict !== null) return false;
   if (facts.has(question.id)) return false;
   const prerequisite = ONLY_AFTER_YES[question.id];
   if (prerequisite && facts.get(prerequisite) !== true) return false;

@@ -30,7 +30,9 @@ Requer Node 24 e npm. No computador, rode `npm ci` e `npm run dev -- --host 0.0.
 
 ## Estado e limites
 
-- 203 alvos e 60 perguntas nesta branch. A maior parte dos atributos foi classificada editorialmente sem fonte individual; seis novos alvos têm [fontes primárias de franquia](docs/CURADORIA_SEGUNDA_ETAPA.md). Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
+A versão 0.2.0 da inteligência V2 está no link acima. Em simulações conservadoras com respostas perfeitas e atributos desconhecidos tratados como “Não sei”, venceu 4/12 alvos fixos e 3/60 alvos espaçados; a base ainda precisa de curadoria. A instalação e a atualização em telefone real permanecem pendentes de teste.
+
+- 203 alvos e 65 perguntas na versão 0.2.0 publicada. A maior parte dos atributos foi classificada editorialmente sem fonte individual; seis novos alvos têm [fontes primárias de franquia](docs/CURADORIA_SEGUNDA_ETAPA.md). Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
 - Respostas `Sim`, `Não`, `Talvez`, `Não sei` são diferentes. `Não sei` não altera o posterior. Palpites recusados retiram o alvo; vitória exige confirmação.
 - A árvore do Livro Mestre é recalculada com a mesma seed, identificada como experimental. O Laboratório compara 18 perguntas de ordem fixa contra seleção adaptativa sob respostas perfeitas, sem afirmar desempenho real.
 - Progresso e partida usam `localStorage` versionado. Não há conta, sincronização ou coleta de dados. O service worker guarda recursos locais para uso offline após o primeiro carregamento por HTTPS/localhost.

@@ -1,6 +1,6 @@
 import type { Answer, Game, Question, Target } from '../domain/types';
 import { attribute } from '../data/questions';
-import { CERTAIN_CLASSIFICATIONS, isQuestionAllowed } from './logic';
+import { analyzeFacts, CERTAIN_CLASSIFICATIONS, isQuestionAllowed } from './logic';
 
 export type Distribution = Map<string, number>;
 export type Choice =
@@ -34,7 +34,14 @@ export function likelihood(target: Target, question: Question, answer: Answer): 
   if (answer === 'dont_know') return question.unknownRate;
   const value = attribute(target, question);
   const scale = 1 - question.unknownRate;
-  if (value === 'unknown') return scale * { yes: 0.25, no: 0.25, maybe: 0.5 }[answer];
+  if (value === 'unknown') {
+    // Missing evidence remains possible in either direction. Broad editorial
+    // tags are sparse, while deliberately partial fine traits are balanced.
+    const response = question.explicit
+      ? { yes: 0.25, no: 0.25, maybe: 0.5 }
+      : { yes: 0.05, no: 0.86, maybe: 0.09 };
+    return scale * response[answer];
+  }
   const chance =
     value === 'yes' ? { yes: 0.79, no: 0.04, maybe: 0.17 } : { yes: 0.05, no: 0.86, maybe: 0.09 };
   return scale * chance[answer];
@@ -117,7 +124,19 @@ export function informationGain(dist: Distribution, targets: Target[], q: Questi
   for (const answer of ['yes', 'no', 'maybe', 'dont_know'] as Answer[]) {
     let chance = 0;
     for (const target of targets) chance += (dist.get(target.id) ?? 0) * likelihood(target, q, answer);
-    if (chance > 0) after += chance * entropy(update(dist, targets, q, answer));
+    if (chance > 0) {
+      const branch = update(dist, targets, q, answer);
+      if (CERTAIN_CLASSIFICATIONS.has(q.id) && (answer === 'yes' || answer === 'no')) {
+        let remaining = 0;
+        for (const target of targets) {
+          const known = attribute(target, q);
+          if (known !== 'unknown' && known !== answer) branch.set(target.id, 0);
+          remaining += branch.get(target.id) ?? 0;
+        }
+        if (remaining > epsilon) for (const [id, p] of branch) branch.set(id, p / remaining);
+      }
+      after += chance * entropy(branch);
+    }
   }
   return Math.max(0, before - after);
 }
@@ -127,47 +146,95 @@ export function informationGain(dist: Distribution, targets: Target[], q: Questi
 export function separation(dist: Distribution, targets: Target[], q: Question): number {
   let yes = 0;
   let no = 0;
+  let unknown = 0;
   for (const target of targets) {
     const answer = attribute(target, q);
     if (answer === 'yes') yes += dist.get(target.id) ?? 0;
     if (answer === 'no') no += dist.get(target.id) ?? 0;
+    if (answer === 'unknown') unknown += dist.get(target.id) ?? 0;
   }
-  return 2 * yes * no;
+  // Unknown can still yield information, but is substantially less reliable
+  // than two independently documented, opposing values.
+  return 2 * yes * no + 0.65 * 2 * yes * unknown;
 }
 
 export function rankQuestions(
   game: Game,
   targets: Target[],
   questions: Question[],
+  depth: 1 | 2 = 1,
 ): { question: Question; gain: number; score: number }[] {
+  if (analyzeFacts(game).conflict !== null) return [];
   const dist = posterior(game, targets, questions);
   const used = new Set(game.actions.filter((a) => a.kind === 'answer').map((a) => a.questionId));
   const byId = new Map(targets.map((t) => [t.id, t]));
-  return (
-    questions
-      .filter((q) => !used.has(q.id) && isQuestionAllowed(game, q))
-      .map((question) => {
-        const gain = informationGain(dist, targets, question);
-        const applicableMass = [...dist].reduce(
-          (n, [id, p]) =>
-            n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
-          0,
-        );
-        const split = separation(dist, targets, question);
-        return {
-          question,
-          gain,
-          score:
-            gain * (0.55 + 0.45 * applicableMass) +
-            0.35 * split -
-            question.cost -
-            question.unknownRate * 0.25,
-        };
-      })
-      // Don't ask questions that cannot split any remaining plausible rivals.
-      .filter(({ question }) => separation(dist, targets, question) > epsilon)
-      .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id))
-  );
+  const initial = questions
+    .filter((q) => !used.has(q.id) && isQuestionAllowed(game, q))
+    .map((question) => {
+      const gain = informationGain(dist, targets, question);
+      const applicableMass = [...dist].reduce(
+        (n, [id, p]) =>
+          n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
+        0,
+      );
+      const split = separation(dist, targets, question);
+      return {
+        question,
+        gain,
+        score:
+          gain * (0.55 + 0.45 * applicableMass) + 0.35 * split - question.cost - question.unknownRate * 0.25,
+      };
+    })
+    // Don't ask questions that cannot split any remaining plausible rivals.
+    .filter(({ question, gain }) => gain >= 0.0005 && separation(dist, targets, question) > epsilon)
+    .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
+  // Equivalent answer fingerprints among 99.5% of the posterior mass are
+  // dominated: only the better-scoring wording can advance this investigation.
+  const significant: Target[] = [];
+  let covered = 0;
+  for (const target of [...targets].sort((a, b) => (dist.get(b.id) ?? 0) - (dist.get(a.id) ?? 0))) {
+    significant.push(target);
+    covered += dist.get(target.id) ?? 0;
+    if (covered >= 0.995) break;
+  }
+  const fingerprints = new Set<string>();
+  const ranked = initial.filter(({ question }) => {
+    const signature = significant.map((target) => attribute(target, question)[0]).join('');
+    if (fingerprints.has(signature)) return false;
+    fingerprints.add(signature);
+    return true;
+  });
+  // Bounded two-ply search: only the best three first moves and eight plausible
+  // follow-ups. Answers "yes"/"no" are weighted by the current predictive
+  // model; uncertain branches retain the immediate score. This is intentionally
+  // bounded for mid-range phones and does not alter the conservative guess gate.
+  if (depth === 1 || ranked.length < 2 || game.actions.length >= 14) return ranked;
+  const future = ranked.slice(0, 8);
+  for (const candidate of ranked.slice(0, 3)) {
+    let followUp = 0;
+    for (const answer of ['yes', 'no'] as const) {
+      const chance = targets.reduce(
+        (sum, target) => sum + (dist.get(target.id) ?? 0) * likelihood(target, candidate.question, answer),
+        0,
+      );
+      if (chance < 0.02) continue;
+      const next = {
+        ...game,
+        actions: [...game.actions, { kind: 'answer' as const, questionId: candidate.question.id, answer }],
+      };
+      const branch = posterior(next, targets, questions);
+      const best = future
+        .filter(({ question }) => question.id !== candidate.question.id && isQuestionAllowed(next, question))
+        .reduce((value, { question }) => {
+          const split = separation(branch, targets, question);
+          if (split <= 0.005) return value;
+          return Math.max(value, informationGain(branch, targets, question) + 0.35 * split - question.cost);
+        }, 0);
+      followUp += chance * best;
+    }
+    candidate.score += 0.32 * followUp;
+  }
+  return ranked.sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
 }
 
 /**
@@ -224,20 +291,34 @@ export function shouldGuess(game: Game, dist: Distribution, top: Target): boolea
   return runnerUp === 0 || confidence / runnerUp >= (isEarly ? 25 : 12);
 }
 
-export function choose(game: Game, targets: Target[], questions: Question[]): Choice | null {
-  if (game.status !== 'playing' || game.actions.length >= 20 || !targets.length) return null;
+export function choose(
+  game: Game,
+  targets: Target[],
+  questions: Question[],
+  depth: 1 | 2 = 1,
+): Choice | null {
+  if (
+    game.status !== 'playing' ||
+    game.actions.length >= 20 ||
+    !targets.length ||
+    analyzeFacts(game).conflict !== null
+  )
+    return null;
   const dist = posterior(game, targets, questions);
   const [top] = targets
     .filter((t) => !game.actions.some((a) => a.kind === 'guess' && a.targetId === t.id))
     .sort((a, b) => (dist.get(b.id) ?? 0) - (dist.get(a.id) ?? 0));
   if (!top) return null;
-  const ranked = rankQuestions(game, targets, questions);
+  const ranked = rankQuestions(game, targets, questions, depth);
   const confidence = dist.get(top.id) ?? 0;
 
   // Never force a low-confidence guess at the twentieth action, or because a
   // question has low gain. Keep gathering evidence until confident or defeated.
   if (shouldGuess(game, dist, top)) return { kind: 'guess', target: top, confidence };
-  if (ranked.length > 0) return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
+  // Editorial question costs guide ordering, not an arbitrary stopping rule.
+  // A small residual gain can be decisive near the strict guess threshold.
+  if (ranked[0] && ranked[0].gain >= 0.0005)
+    return { kind: 'question', question: ranked[0].question, gain: ranked[0].gain };
   return null;
 }
 
@@ -259,6 +340,18 @@ export function answerGame(game: Game, choice: Choice, answer: Answer | boolean)
     status: won ? 'won' : actions.length === 20 ? 'lost' : 'playing',
     endedAt: won || actions.length === 20 ? Date.now() : undefined,
     lastGuess: action.kind === 'guess' ? action.targetId : game.lastGuess,
+  };
+}
+
+/** Editing an earlier clue invalidates all later deductions and returns their
+ * action budget. Previous guesses must never be kept after the edit. */
+export function reviseAnswer(game: Game, index: number, answer: Answer): Game {
+  const action = game.actions[index];
+  if (game.status !== 'playing' || action?.kind !== 'answer') return game;
+  return {
+    ...game,
+    actions: [...game.actions.slice(0, index), { ...action, answer }],
+    lastGuess: undefined,
   };
 }
 

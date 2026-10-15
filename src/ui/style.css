@@ -739,6 +739,41 @@ small {
   max-width: 280px;
   margin: 0;
 }
+.clue-reason {
+  margin-top: 0.6rem;
+  font-size: 0.83rem;
+  color: var(--muted, #b9c4d8);
+}
+.clue-reason summary,
+.review-list summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.clue-reason p {
+  margin: 0.45rem 0 0;
+}
+.review-list {
+  max-height: 42vh;
+  overflow-y: auto;
+  margin-top: 0.75rem;
+}
+.review-list details {
+  padding: 0.55rem 0;
+  border-top: 1px solid #ffffff25;
+}
+.review-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.review-options button {
+  min-height: 44px;
+  border: 1px solid #f3c67466;
+  border-radius: 0.75rem;
+  background: #202841;
+  color: #fff;
+}
 .answer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

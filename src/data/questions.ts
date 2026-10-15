@@ -1,4 +1,4 @@
-import type { Question, Target } from '../domain/types';
+import type { AttributeValue, Question, Target } from '../domain/types';
 
 const Q = (
   id: string,
@@ -43,15 +43,18 @@ export const questions: Question[] = [
     0.1,
   ),
   Q('cartoon', 'É de um desenho animado ocidental?', 'cartoon', 'Isola animações fora do anime.', 0.04, 0.05),
-  Q(
-    'animatedfilm',
-    'É principalmente de um filme de animação, em vez de um desenho de TV?',
-    'animatedfilm',
-    'Refina o ramo de cartoons: diferencia longas animados de desenhos de TV.',
-    0.05,
-    0.07,
-    ['fictional'],
-  ),
+  {
+    ...Q(
+      'animatedfilm',
+      'É principalmente de um filme de animação, em vez de um desenho de TV?',
+      'animatedfilm',
+      'Refina o ramo de cartoons: diferencia longas animados de desenhos de TV.',
+      0.05,
+      0.07,
+      ['fictional'],
+    ),
+    explicit: true,
+  },
   Q('anime', 'É de anime ou mangá?', 'anime', 'Divide o ramo de animação japonesa.', 0.04, 0.04),
   Q('game', 'É associado a videogames?', 'game', 'Divide personagens e criadores de jogos.', 0.04, 0.07),
   Q(
@@ -343,11 +346,75 @@ export const questions: Question[] = [
     ),
     explicit: true,
   },
+  {
+    ...Q(
+      'santosclub',
+      'Jogou pelo Santos Futebol Clube?',
+      'santosclub',
+      'Distingue uma trajetória no clube santista.',
+      0.07,
+      0.07,
+      ['real'],
+    ),
+    explicit: true,
+  },
+  {
+    ...Q(
+      'barbiesong',
+      'Cantou “What Was I Made For?”, do filme Barbie?',
+      'barbiesong',
+      'Reconhece a intérprete da canção do filme.',
+      0.09,
+      0.1,
+      ['real'],
+    ),
+    explicit: true,
+  },
+  {
+    ...Q(
+      'construcao',
+      'Compôs a canção “Construção”?',
+      'construcao',
+      'Distingue a obra de um compositor brasileiro.',
+      0.08,
+      0.08,
+      ['real'],
+    ),
+    explicit: true,
+  },
+  {
+    ...Q(
+      'blackwidow',
+      'Interpretou a Viúva Negra no cinema?',
+      'blackwidow',
+      'Distingue o papel de uma atriz da Marvel.',
+      0.08,
+      0.08,
+      ['real'],
+    ),
+    explicit: true,
+  },
 ];
 
 // Recorte editorial de pistas mais finas. Ausência aqui significa desconhecido,
 // jamais um “Não” inventado. A auditoria individual de fontes ainda está pendente.
 const explicitTraits: Record<string, { yes: string[]; no: string[] }> = {
+  santosclub: { yes: ['Pelé', 'Neymar'], no: [] },
+  barbiesong: { yes: ['Billie Eilish'], no: [] },
+  construcao: { yes: ['Chico Buarque'], no: [] },
+  blackwidow: { yes: ['Scarlett Johansson'], no: [] },
+  animatedfilm: {
+    yes: [
+      'Shrek',
+      'Burro (Shrek)',
+      'Elsa (Frozen)',
+      'Simba',
+      'Woody (Toy Story)',
+      'Buzz Lightyear',
+      'WALL-E',
+    ],
+    no: ['Homer Simpson', 'Bart Simpson', 'Lisa Simpson', 'Bob Esponja', 'Patrick Estrela', 'Lula Molusco'],
+  },
   woman: {
     yes: [
       'Billie Eilish',
@@ -500,13 +567,88 @@ const explicitTraits: Record<string, { yes: string[]; no: string[] }> = {
   },
 };
 
+const traitSources: Record<string, Record<string, string>> = {
+  santosclub: {
+    Pelé: 'Santos FC: https://www.santosfc.com.br/pele-inicia-sua-historia-com-o-santos/',
+    Neymar:
+      'Santos FC: https://www.santosfc.com.br/assumindo-a-10-de-rei-pele-idolo-neymar-jr-esta-de-volta-ao-santos-fc/',
+  },
+  barbiesong: {
+    'Billie Eilish':
+      'Academia de Cinema: https://press.oscars.org/news/jon-batiste-becky-g-billie-eilish-and-finneas-oconnell-scott-george-and-osage-singers-ryan',
+  },
+  construcao: {
+    'Chico Buarque': 'Chico Buarque: https://www.chicobuarque.com.br/obra/cancoes',
+  },
+  blackwidow: {
+    'Scarlett Johansson':
+      'Marvel: https://www.marvel.com/articles/movies/scarlett-johansson-natasha-romanoff-journey-black-widow-set-visit',
+  },
+  threecups: {
+    Pelé: 'FIFA: https://www.fifa.com/en/tournaments/mens/worldcup/articles/pele-three-world-cup-titles-only-player',
+  },
+  lakers: {
+    'Kobe Bryant': 'Los Angeles Lakers: https://www.nba.com/lakers/history/alumni/kobe-bryant',
+  },
+  nba90s: {
+    'Kobe Bryant':
+      'NBA: https://www.nba.com/news/week-history-kobe-bryant-makes-nba-debut-los-angeles-lakers-1996',
+  },
+};
+
+export type AttributeEvidence = {
+  value: AttributeValue;
+  source: string | null;
+  confidence: 'curated' | 'unverified' | 'unknown';
+};
+
+export function validateTraitEvidence(targets: Target[]): string[] {
+  const issues: string[] = [];
+  const names = new Set(targets.map((target) => target.name));
+  const ids = new Set(questions.map((question) => question.id));
+  for (const [tag, trait] of Object.entries(explicitTraits)) {
+    if (!ids.has(tag)) issues.push(`Pista sem pergunta: ${tag}`);
+    for (const name of [...trait.yes, ...trait.no]) {
+      if (!names.has(name)) issues.push(`Pista ${tag}: alvo ausente ${name}`);
+      if (trait.yes.includes(name) && trait.no.includes(name))
+        issues.push(`Pista contraditória: ${tag}/${name}`);
+    }
+  }
+  for (const [tag, sources] of Object.entries(traitSources)) {
+    for (const name of Object.keys(sources))
+      if (!explicitTraits[tag]?.yes.includes(name) && !explicitTraits[tag]?.no.includes(name))
+        issues.push(`Fonte sem fato explícito: ${tag}/${name}`);
+  }
+  return [...new Set(issues)];
+}
+
+export function attributeEvidence(target: Target, question: Question): AttributeEvidence {
+  const value = attribute(target, question);
+  if (value === 'unknown') return { value, source: null, confidence: 'unknown' };
+  const source = traitSources[question.tag]?.[target.name];
+  if (source) return { value, source, confidence: 'curated' };
+  if (['real', 'fictional', 'group', 'br', 'us', 'jp', 'uk', 'mx'].includes(question.tag))
+    return { value, source: target.provenance, confidence: target.confidence };
+  return {
+    value,
+    source: 'Classificação editorial da seed; fonte individual pendente',
+    confidence: 'unverified',
+  };
+}
+
 export function attribute(target: Target, question: Question): 'yes' | 'no' | 'unknown' {
   if (question.applicable && !question.applicable.includes(target.type)) return 'unknown';
-  if (question.tag === 'animatedfilm') {
-    // Only ask this inside the western-animation branch. An animated feature
-    // can be both a cartoon AND a film; there is no blanket contradiction.
-    if (!target.tags.includes('cartoon')) return 'unknown';
-    return target.tags.includes('film') ? 'yes' : 'no';
+  if (['real', 'fictional', 'group'].includes(question.tag))
+    return target.type === question.tag ? 'yes' : 'no';
+  if (['br', 'us', 'jp', 'uk', 'mx'].includes(question.tag)) {
+    const origin: Record<string, string> = {
+      br: 'Brasil',
+      us: 'EUA',
+      jp: 'Japão',
+      uk: 'Reino Unido',
+      mx: 'México',
+    };
+    return target.origin === origin[question.tag] ? 'yes' : 'no';
   }
   if (question.explicit) {
     const trait = explicitTraits[question.tag];
@@ -514,5 +656,7 @@ export function attribute(target: Target, question: Question): 'yes' | 'no' | 'u
     if (trait?.no.includes(target.name)) return 'no';
     return 'unknown';
   }
-  return target.tags.includes(question.tag) ? 'yes' : 'no';
+  // Tags are positive claims, not a closed-world registry. Missing data is
+  // never a negative fact; only categorical fields and explicit contrasts are.
+  return target.tags.includes(question.tag) ? 'yes' : 'unknown';
 }
