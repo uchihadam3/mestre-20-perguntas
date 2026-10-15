@@ -1,5 +1,15 @@
 # Progresso — Mestre das 20 Perguntas
 
+## Inteligência V2 — PR em revisão (2026-10-15)
+
+- Partindo do merge do PR #3 (`7d09cda`) e preservando `d651a14`, a taxonomia deixou de tratar cartoon e anime como exclusões lógicas. Tipo e país da pessoa/obra continuam categorias exclusivas. A ausência de uma tag positiva agora produz **desconhecido**, não um “Não” determinístico; detalhes em [Taxonomia V2](TAXONOMIA_INTELIGENCIA_V2.md).
+- Conflitos de respostas definitivas interrompem a investigação e oferecem correção de uma resposta anterior, descartando ações posteriores e devolvendo seu orçamento. `Talvez`/`Não sei` não criam deduções. A pergunta selecionada traz explicação opcional com exemplos de fichas que distingue; a aparência, Academia e PWA existentes foram preservados.
+- Ranking de perguntas elimina implicações e assinaturas de resposta dominadas; cálculo de ganho inclui restrições duras de tipo/país. Busca limitada em duas etapas foi implementada e comparada, mas ficou desativada por padrão: empatou em vitórias no recorte editorial (**7/12** e **1/36**) e custa mais no celular.
+- Base: **203 alvos / 65 perguntas**. Quatro pistas específicas positivas foram checadas em fontes primárias (Santos FC, Academia de Cinema, Chico Buarque e Marvel), sem completar negativas automaticamente. A validação confere referências a alvos, perguntas e contradições no cadastro de pistas. Ainda faltam fontes por atributo na maior parte da seed.
+- Avaliação de partidas completas com até 20 ações, respostas perfeitas conforme a informação da ficha: no PR #3, o benchmark antigo era **9/12** fixos e **11/60** espaçados, mas transformava tags ausentes em “Não”. Com lacunas honestamente respondidas “Não sei”, V2 registra **2/12** e **2/60**; no cenário editorial hipotético que responde “Não” a tags amplas ausentes, **7/12**, **7/60** e **1/36** em um grupo separado. Não são cenários diretamente comparáveis nem evidência de melhoria de acertos. O resultado mostra que a cobertura da base ainda não atende à meta de inteligência.
+- A auditoria contabilizou **0 perguntas sem divisão**, **0 contradições** nas partidas adaptativas e 139 perguntas de ganho abaixo de 0,01 bit no recorte conservador de 60 alvos. O corte ativo é 0,0005 bit; essa cauda fraca precisa de mais fichas auditadas e uma política de parada melhor. O roteiro fixo desperdiçou 105 perguntas sem divisão nos 12 casos, enquanto o adaptativo não apresentou nenhuma nessa definição.
+- `format:check`, `typecheck`, `lint`, **29 testes**, `validate:data` (0 problemas) e `build` passaram localmente; o [CI do PR #4 passou](https://github.com/uchihadam3/mestre-20-perguntas/actions/runs/38666575748). Teste visual em 320–430 px, acessibilidade em leitor de tela, instalação em aparelho e testes humanos permanecem pendentes. **A versão jogável publicada não foi alterada por esta branch.**
+
 ## Segunda etapa em andamento (2026-10-14)
 
 - Preservada a política de palpites do commit `d651a14`: limiares 99,5%/97,5%, evidências mínimas, intervalo após erro, no máximo dois palpites e nenhuma tentativa forçada na ação 20.
