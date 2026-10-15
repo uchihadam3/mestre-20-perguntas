@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { targets } from '../data/targets';
 import { questions, attribute } from '../data/questions';
 import { validateData } from '../data/validate';
+import { isQuestionAllowed, logicalFacts } from './logic';
 import {
   answerGame,
   choose,
@@ -115,9 +116,13 @@ describe('seed e inferência', () => {
             : (attribute(target, choice.question) as 'yes' | 'no'),
       );
     }
-    expect(game.actions.length).toBe(20);
-    expect(game.status).toBe('lost');
-    expect(choose(game, targets, questions)).toBeNull();
+    // A smarter engine may exhaust all informative questions before 20.
+    // That is preferable to filling the remaining slots with nonsense.
+    expect(game.actions.length).toBeLessThanOrEqual(20);
+    expect(game.actions.length).toBeGreaterThan(0);
+    const ended = game.status === 'playing' ? concedeGame(game) : game;
+    expect(ended.status).toBe('lost');
+    expect(choose(ended, targets, questions)).toBeNull();
   });
   it('só concede vitória após confirmação de palpite', () => {
     const guess = { kind: 'guess' as const, target: targets[0], confidence: 0.9 };
@@ -195,5 +200,118 @@ describe('seed e inferência', () => {
     expect(last.status).toBe('lost');
     expect(last.actions.length).toBe(20);
     expect(last.actions.filter((action) => action.kind === 'guess')).toHaveLength(0);
+  });
+  it('origem americana positiva descarta as demais origens e candidatos incompatíveis', () => {
+    const game = {
+      ...newGame('origin'),
+      actions: [{ kind: 'answer' as const, questionId: 'us', answer: 'yes' as const }],
+    };
+    const possibilities = rankQuestions(game, targets, questions).map((entry) => entry.question.id);
+    for (const id of ['br', 'jp', 'uk', 'mx', 'us']) expect(possibilities).not.toContain(id);
+    const dist = posterior(game, targets, questions);
+    const american = targets.find((target) => target.name === 'Homer Simpson')!;
+    const brazilian = targets.find((target) => target.name === 'Pelé')!;
+    expect(dist.get(american.id)).toBeGreaterThan(0);
+    expect(dist.get(brazilian.id)).toBe(0);
+    expect([...dist.values()].reduce((sum, p) => sum + p, 0)).toBeCloseTo(1);
+  });
+
+  it('cartoon ocidental não volta a perguntar anime ou cinema genérico', () => {
+    const game = {
+      ...newGame('cartoon'),
+      actions: [{ kind: 'answer' as const, questionId: 'cartoon', answer: 'yes' as const }],
+    };
+    const ids = rankQuestions(game, targets, questions).map((entry) => entry.question.id);
+    for (const id of ['anime', 'film', 'series', 'novela', 'fictional', 'real', 'group']) {
+      expect(ids).not.toContain(id);
+    }
+    // Filmes animados continuam candidatos; a subdivisão é específica.
+    expect(ids).toContain('animatedfilm');
+    const dist = posterior(game, targets, questions);
+    expect(dist.get(targets.find((target) => target.name === 'Shrek')!.id)).toBeGreaterThan(0);
+    expect(dist.get(targets.find((target) => target.name === 'Goku')!.id)).toBe(0);
+    const subtype = questions.find((question) => question.id === 'animatedfilm')!;
+    expect(
+      attribute(
+        targets.find((target) => target.name === 'Shrek')!,
+        subtype,
+      ),
+    ).toBe('yes');
+    expect(
+      attribute(
+        targets.find((target) => target.name === 'Homer Simpson')!,
+        subtype,
+      ),
+    ).toBe('no');
+  });
+
+  it('deduz perguntas-pai e evita perguntas sobre tipo de alvo incompatível', () => {
+    const withAnswer = (id: string, answer: 'yes' | 'no') => ({
+      ...newGame(id),
+      actions: [{ kind: 'answer' as const, questionId: id, answer }],
+    });
+    const football = withAnswer('football', 'yes');
+    expect(logicalFacts(football).get('sport')).toBe(true);
+    expect(
+      isQuestionAllowed(
+        football,
+        questions.find((q) => q.id === 'sport')!,
+      ),
+    ).toBe(false);
+    const notSport = withAnswer('sport', 'no');
+    expect(
+      isQuestionAllowed(
+        notSport,
+        questions.find((q) => q.id === 'football')!,
+      ),
+    ).toBe(false);
+    expect(
+      isQuestionAllowed(
+        notSport,
+        questions.find((q) => q.id === 'basket')!,
+      ),
+    ).toBe(false);
+    const real = withAnswer('real', 'yes');
+    expect(
+      isQuestionAllowed(
+        real,
+        questions.find((q) => q.id === 'animal')!,
+      ),
+    ).toBe(false);
+    expect(
+      isQuestionAllowed(
+        real,
+        questions.find((q) => q.id === 'hero')!,
+      ),
+    ).toBe(false);
+    const group = withAnswer('group', 'yes');
+    expect(
+      isQuestionAllowed(
+        group,
+        questions.find((q) => q.id === 'real')!,
+      ),
+    ).toBe(false);
+  });
+
+  it('incerteza não elimina países nem transforma hipóteses em fatos', () => {
+    const game = {
+      ...newGame('maybe-us'),
+      actions: [{ kind: 'answer' as const, questionId: 'us', answer: 'maybe' as const }],
+    };
+    expect(logicalFacts(game).size).toBe(0);
+    expect(
+      isQuestionAllowed(
+        game,
+        questions.find((q) => q.id === 'br')!,
+      ),
+    ).toBe(true);
+    expect(
+      isQuestionAllowed(
+        game,
+        questions.find((q) => q.id === 'jp')!,
+      ),
+    ).toBe(true);
+    const dist = posterior(game, targets, questions);
+    expect(dist.get(targets.find((t) => t.name === 'Pelé')!.id)).toBeGreaterThan(0);
   });
 });

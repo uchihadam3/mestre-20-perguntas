@@ -1,5 +1,6 @@
 import type { Answer, Game, Question, Target } from '../domain/types';
 import { attribute } from '../data/questions';
+import { CERTAIN_CLASSIFICATIONS, isQuestionAllowed } from './logic';
 
 export type Distribution = Map<string, number>;
 export type Choice =
@@ -52,6 +53,43 @@ export function update(
   return new Map(targets.map((t, i) => [t.id, weights[i] / sum]));
 }
 
+/**
+ * Definitive, curated classifications eliminate logically incompatible
+ * candidates. Other/partial traits remain probabilistic; if answers conflict
+ * with every candidate, fall back to soft evidence rather than inventing a win.
+ */
+function constrainCertainAnswers(
+  dist: Distribution,
+  game: Game,
+  targets: Target[],
+  questions: Question[],
+): Distribution {
+  const certain = game.actions.flatMap((action) => {
+    if (
+      action.kind !== 'answer' ||
+      (action.answer !== 'yes' && action.answer !== 'no') ||
+      !CERTAIN_CLASSIFICATIONS.has(action.questionId)
+    )
+      return [];
+    const question = questions.find((item) => item.id === action.questionId);
+    return question ? [{ question, answer: action.answer }] : [];
+  });
+  if (!certain.length) return dist;
+  const result = new Map(
+    targets.map((target) => {
+      const incompatible = certain.some(({ question, answer }) => {
+        const known = attribute(target, question);
+        return known !== 'unknown' && known !== answer;
+      });
+      return [target.id, incompatible ? 0 : (dist.get(target.id) ?? 0)] as const;
+    }),
+  );
+  const sum = [...result.values()].reduce((a, b) => a + b, 0);
+  if (sum <= epsilon) return dist;
+  for (const [id, weight] of result) result.set(id, weight / sum);
+  return result;
+}
+
 export function posterior(game: Game, targets: Target[], questions: Question[], mix = 0.5): Distribution {
   let dist = prior(targets, mix);
   for (const action of game.actions) {
@@ -64,7 +102,7 @@ export function posterior(game: Game, targets: Target[], questions: Question[], 
       if (sum > epsilon) for (const [id, p] of dist) dist.set(id, p / sum);
     }
   }
-  return dist;
+  return constrainCertainAnswers(dist, game, targets, questions);
 }
 
 export function entropy(dist: Distribution): number {
@@ -105,24 +143,31 @@ export function rankQuestions(
   const dist = posterior(game, targets, questions);
   const used = new Set(game.actions.filter((a) => a.kind === 'answer').map((a) => a.questionId));
   const byId = new Map(targets.map((t) => [t.id, t]));
-  return questions
-    .filter((q) => !used.has(q.id))
-    .map((question) => {
-      const gain = informationGain(dist, targets, question);
-      const applicableMass = [...dist].reduce(
-        (n, [id, p]) =>
-          n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
-        0,
-      );
-      const split = separation(dist, targets, question);
-      return {
-        question,
-        gain,
-        score:
-          gain * (0.55 + 0.45 * applicableMass) + 0.35 * split - question.cost - question.unknownRate * 0.25,
-      };
-    })
-    .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
+  return (
+    questions
+      .filter((q) => !used.has(q.id) && isQuestionAllowed(game, q))
+      .map((question) => {
+        const gain = informationGain(dist, targets, question);
+        const applicableMass = [...dist].reduce(
+          (n, [id, p]) =>
+            n + (!question.applicable || question.applicable.includes(byId.get(id)!.type) ? p : 0),
+          0,
+        );
+        const split = separation(dist, targets, question);
+        return {
+          question,
+          gain,
+          score:
+            gain * (0.55 + 0.45 * applicableMass) +
+            0.35 * split -
+            question.cost -
+            question.unknownRate * 0.25,
+        };
+      })
+      // Don't ask questions that cannot split any remaining plausible rivals.
+      .filter(({ question }) => separation(dist, targets, question) > epsilon)
+      .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id))
+  );
 }
 
 /**
