@@ -420,6 +420,31 @@ describe('seed e inferência', () => {
     expect(ranked.map((entry) => entry.question.id)).toEqual(['sport']);
   });
 
+  it('não deixa uma pergunta quase sem ganho bloquear outra útil', () => {
+    const game = {
+      ...newGame('late-pele'),
+      actions: [
+        ['real', 'yes'],
+        ['br', 'yes'],
+        ['music', 'no'],
+        ['sport', 'yes'],
+        ['football', 'yes'],
+        ['woman', 'no'],
+        ['threecups', 'yes'],
+        ['history', 'yes'],
+        ['olderfootball', 'yes'],
+      ].map(([questionId, answer]) => ({
+        kind: 'answer' as const,
+        questionId,
+        answer: answer as 'yes' | 'no',
+      })),
+    };
+    const ranked = rankQuestions(game, targets, questions);
+    expect(ranked.every((entry) => entry.gain >= 0.0005)).toBe(true);
+    expect(ranked.some((entry) => entry.question.id === 'santosclub')).toBe(true);
+    expect(choose(game, targets, questions)?.kind).toBe('question');
+  });
+
   it('não arrisca nome quando dois alvos têm assinatura idêntica', () => {
     const twin = {
       ...targets[0],

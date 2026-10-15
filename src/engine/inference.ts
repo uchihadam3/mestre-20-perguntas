@@ -38,7 +38,7 @@ export function likelihood(target: Target, question: Question, answer: Answer): 
     // Missing evidence remains possible in either direction. Broad editorial
     // tags are sparse, while deliberately partial fine traits are balanced.
     const response = question.explicit
-      ? { yes: 0.28, no: 0.34, maybe: 0.38 }
+      ? { yes: 0.25, no: 0.25, maybe: 0.5 }
       : { yes: 0.05, no: 0.86, maybe: 0.09 };
     return scale * response[answer];
   }
@@ -186,7 +186,7 @@ export function rankQuestions(
       };
     })
     // Don't ask questions that cannot split any remaining plausible rivals.
-    .filter(({ question }) => separation(dist, targets, question) > epsilon)
+    .filter(({ question, gain }) => gain >= 0.0005 && separation(dist, targets, question) > epsilon)
     .sort((a, b) => b.score - a.score || a.question.id.localeCompare(b.question.id));
   // Equivalent answer fingerprints among 99.5% of the posterior mass are
   // dominated: only the better-scoring wording can advance this investigation.
