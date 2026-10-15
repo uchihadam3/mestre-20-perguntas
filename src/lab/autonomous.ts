@@ -16,7 +16,12 @@ import { analyzeFacts, isQuestionAllowed } from '../engine/logic';
 
 export type Scenario = 'known' | 'uncertain' | 'noisy' | 'outside';
 export type Policy = 'fixed' | 'split' | 'current' | 'lookahead' | 'planned';
-export type Branch = { answer: Answer; next: string | null; third: string | null; mass: number };
+export type Branch = {
+  answer: Answer;
+  next: string | null;
+  thirdByAnswer: Record<Answer, string | null>;
+  mass: number;
+};
 export type Opening = { first: string; branches: Branch[] };
 export type Trial = {
   target: string;
@@ -58,7 +63,7 @@ export type Comparison = {
 };
 export type LabReport = {
   schema: 1;
-  catalog: { targets: number; questions: number };
+  catalog: { targets: number; questions: number; fingerprint: string };
   config: { seed: number; trials: number; maxMs: number };
   cohorts: Record<'train' | 'validation' | 'holdout', number>;
   baseline: Comparison;
@@ -69,7 +74,7 @@ export type LabReport = {
   alternatives: { first: string; validation: Summary }[];
   approved: boolean;
   reason: string;
-  indistinguishable: { names: string[]; knownQuestions: number }[];
+  indistinguishable: { names: string[]; knownQuestions: number; research: string }[];
 };
 
 const hash = (value: string) => {
@@ -77,6 +82,13 @@ const hash = (value: string) => {
   for (const char of value) h = Math.imul(h ^ char.charCodeAt(0), 16777619);
   return h >>> 0;
 };
+export const catalogFingerprint = (targets: Target[], questions: Question[]) =>
+  hash(
+    questions.map((q) => q.id).join('|') +
+      targets
+        .map((t) => `${t.id}:${t.fameTier}:${t.origin}:${questions.map((q) => attribute(t, q)[0]).join('')}`)
+        .join('|'),
+  ).toString(16);
 const random = (seed: number) => {
   let x = seed >>> 0;
   return () => {
@@ -146,10 +158,17 @@ export function indistinguishable(targets: Target[], questions: Question[]) {
   return [...signatures.entries()]
     .filter(([, pair]) => pair.length > 1)
     .sort((a, b) => b[1].length - a[1].length)
-    .slice(0, 20)
     .map(([key, pair]) => ({
       names: pair.map((t) => t.name),
       knownQuestions: [...key].filter((c) => c !== 'u').length,
+      research:
+        pair[0].type === 'fictional'
+          ? 'Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências.'
+          : pair[0].tags.includes('sport')
+            ? 'Pesquisar clube, modalidade, época e títulos em fontes oficiais antes de criar perguntas.'
+            : pair[0].tags.includes('film')
+              ? 'Pesquisar filmografia, prêmios e papéis em fontes oficiais antes de criar perguntas.'
+              : 'Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista.',
     }));
 }
 
@@ -161,17 +180,23 @@ export function openingFor(targets: Target[], questions: Question[], first: Ques
     branches: (['yes', 'no', 'maybe', 'dont_know'] as Answer[]).map((answer) => {
       const game = answerGame(root, { kind: 'question', question: first, gain: 0 }, answer);
       const next = rankQuestions(game, targets, questions)[0]?.question;
-      // Third move follows the strongest answer of the second move; the other
-      // continuations are computed by the game at play time.
-      const second = next && answerGame(game, { kind: 'question', question: next, gain: 0 }, 'yes');
-      const third = second && rankQuestions(second, targets, questions)[0]?.question.id;
+      const thirdByAnswer = Object.fromEntries(
+        (['yes', 'no', 'maybe', 'dont_know'] as Answer[]).map((secondAnswer) => {
+          const second =
+            next && answerGame(game, { kind: 'question', question: next, gain: 0 }, secondAnswer);
+          return [
+            secondAnswer,
+            second ? (rankQuestions(second, targets, questions)[0]?.question.id ?? null) : null,
+          ];
+        }),
+      ) as Record<Answer, string | null>;
       const mass = targets.reduce((n, target) => {
         const value = attribute(target, first);
         return (
           n + (dist.get(target.id) ?? 0) * Number((value === 'unknown' ? 'dont_know' : value) === answer)
         );
       }, 0);
-      return { answer, next: next?.id ?? null, third: third ?? null, mass };
+      return { answer, next: next?.id ?? null, thirdByAnswer, mass };
     }),
   };
 }
@@ -359,8 +384,14 @@ export function runLab(
 ): LabReport {
   const split = cohorts(targets, options.seed);
   if (options.sampleLimit) {
-    split.validation = split.validation.slice(0, options.sampleLimit);
-    split.holdout = split.holdout.slice(0, options.sampleLimit);
+    for (const cohort of ['validation', 'holdout'] as const) {
+      const rows = split[cohort];
+      const count = Math.min(options.sampleLimit, rows.length);
+      split[cohort] = Array.from(
+        { length: count },
+        (_, i) => rows[Math.floor(((i + 0.5) * rows.length) / count)],
+      );
+    }
   }
   const started = Date.now();
   const remaining = () => Math.max(1000, options.maxMs - (Date.now() - started));
@@ -428,7 +459,11 @@ export function runLab(
     proposed.overall.wasted <= baseline.overall.wasted;
   return {
     schema: 1,
-    catalog: { targets: targets.length, questions: questions.length },
+    catalog: {
+      targets: targets.length,
+      questions: questions.length,
+      fingerprint: catalogFingerprint(targets, questions),
+    },
     config: { seed: options.seed, trials: options.repeats, maxMs: options.maxMs },
     cohorts: Object.fromEntries(
       Object.entries(split).map(([key, rows]) => [key, rows.length]),

@@ -57,7 +57,7 @@ describe('Laboratório Autônomo', () => {
     ).toBe(false);
     expect(analyzeFacts(game).conflict).toBeNull();
     expect(publishedChoice(game, targets, questions)).toEqual(choose(game, targets, questions));
-    expect(strategyVersion).toBe('0.2.0');
+    expect(strategyVersion).toBe('0.3.0');
     const revised = reviseAnswer(game, 0, 'dont_know');
     expect(analyzeFacts(revised).facts.get('br')).toBeUndefined();
   });

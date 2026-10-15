@@ -1,0 +1,27 @@
+{
+  "catalog": {
+    "targets": 203,
+    "questions": 65,
+    "fingerprint": "b666a07c"
+  },
+  "config": {
+    "seed": 20261015,
+    "sample": 6
+  },
+  "baseline": {
+    "games": 24,
+    "wins": 0,
+    "within5": 0,
+    "within10": 0,
+    "within15": 0,
+    "within20": 0,
+    "meanActions": 16.75,
+    "medianActions": 18,
+    "p90Actions": 20,
+    "falseGuesses": 0,
+    "wasted": 0,
+    "weak": 99,
+    "conflicts": 0,
+    "stopped": 12
+  }
+}

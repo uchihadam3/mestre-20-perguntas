@@ -27,14 +27,16 @@ Requer Node 24 e npm. No computador, rode `npm ci` e `npm run dev -- --host 0.0.
 | `npm test`              | Testes do motor e da progressão      |
 | `npm run benchmark`     | Simulação determinística de 12 alvos |
 | `npm run build`         | Compilação de produção               |
+| `npm run lab:ci`        | Laboratório reduzido para PR         |
+| `npm run lab:nightly`   | Simulações amplas fora do celular    |
 
 ## Estado e limites
 
-A versão 0.2.0 da inteligência V2 está no link acima. Em simulações conservadoras com respostas perfeitas e atributos desconhecidos tratados como “Não sei”, venceu 4/12 alvos fixos e 3/60 alvos espaçados; a base ainda precisa de curadoria. A instalação e a atualização em telefone real permanecem pendentes de teste.
+A versão 0.3.0 inclui o [Laboratório Autônomo](docs/LABORATORIO_AUTONOMO.md), que simula e relata propostas sem mudar a estratégia jogável sem revisão. A base ainda precisa de curadoria; a instalação e a atualização em telefone real permanecem pendentes de teste.
 
-- 203 alvos e 65 perguntas na versão 0.2.0 publicada. A maior parte dos atributos foi classificada editorialmente sem fonte individual; seis novos alvos têm [fontes primárias de franquia](docs/CURADORIA_SEGUNDA_ETAPA.md). Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
+- 203 alvos e 65 perguntas na versão 0.3.0. A maior parte dos atributos foi classificada editorialmente sem fonte individual; seis novos alvos têm [fontes primárias de franquia](docs/CURADORIA_SEGUNDA_ETAPA.md). Popularidade é hipótese de prior, não medição de público. A validação automática só atesta estrutura e contradições simples; a auditoria factual individual é trabalho pendente.
 - Respostas `Sim`, `Não`, `Talvez`, `Não sei` são diferentes. `Não sei` não altera o posterior. Palpites recusados retiram o alvo; vitória exige confirmação.
-- A árvore do Livro Mestre é recalculada com a mesma seed, identificada como experimental. O Laboratório compara 18 perguntas de ordem fixa contra seleção adaptativa sob respostas perfeitas, sem afirmar desempenho real.
+- O Livro Mestre usa a estratégia jogável versionada. O botão local do Laboratório só demonstra um recorte de 12 alvos; o processo offline compara cinco políticas e quatro cenários com holdout, relatórios e trava de promoção. Simulações não medem pessoas reais.
 - Progresso e partida usam `localStorage` versionado. Não há conta, sincronização ou coleta de dados. O service worker guarda recursos locais para uso offline após o primeiro carregamento por HTTPS/localhost.
 - Sem imagens externas; marca e elementos gráficos são CSS/SVG originais.
 

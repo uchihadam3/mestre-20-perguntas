@@ -4,7 +4,6 @@ import { targets } from '../data/targets';
 import { attribute, questions } from '../data/questions';
 import {
   answerGame,
-  choose,
   concedeGame,
   informationGain,
   medal,
@@ -16,7 +15,12 @@ import {
 } from '../engine/inference';
 import { analyzeFacts } from '../engine/logic';
 import { simulate, type Benchmark } from '../engine/simulate';
+import labSnapshot from '../../reports/nightly.json';
+import type { LabReport } from '../lab/autonomous';
+import { publishedChoice, strategyVersion } from '../lab/published';
 import { badges, finish, load, mastery, save, train } from '../persistence/storage';
+
+const labReport = labSnapshot as unknown as LabReport;
 
 type Page = 'hub' | 'game' | 'result' | 'academy' | 'book' | 'lab' | 'settings';
 type InstallPrompt = Event & {
@@ -51,7 +55,7 @@ const origin = (t: Target) =>
 export function getExercise(mode: Exercise['mode'], step: number): Exercise {
   if (mode === 'memory' || mode === 'split' || mode === 'error') {
     const target = targets[((step % 12) * 17 + 7) % targets.length];
-    const first = choose(newGame('lesson'), targets, questions);
+    const first = publishedChoice(newGame('lesson'), targets, questions);
     const firstAnswer = first?.kind === 'question' ? attribute(target, first.question) : 'unknown';
     const game =
       first?.kind === 'question'
@@ -212,6 +216,8 @@ export default function App() {
   const [exerciseAnswer, setExerciseAnswer] = useState<string | null>(null);
   const [benchmarks, setBenchmarks] = useState<Benchmark[] | null>(null);
   const [benchmarkBusy, setBenchmarkBusy] = useState(false);
+  const [labBranch, setLabBranch] = useState<Answer>('yes');
+  const [labSecond, setLabSecond] = useState<Answer>('yes');
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
   const [installPrompt, setInstallPrompt] = useState<InstallPrompt | null>(null);
@@ -241,7 +247,7 @@ export default function App() {
       window.removeEventListener('appinstalled', onInstalled);
     };
   }, []);
-  const choice = useMemo(() => (game ? choose(game, targets, questions) : null), [game]);
+  const choice = useMemo(() => (game ? publishedChoice(game, targets, questions) : null), [game]);
   const factReport = useMemo(() => (game ? analyzeFacts(game) : null), [game]);
   const rationale = useMemo(() => {
     if (!game || choice?.kind !== 'question') return null;
@@ -257,7 +263,7 @@ export default function App() {
       return `${yes.name} tem “Sim”; ${unknown.name} ainda está sem anotação. Sua resposta ajuda a separar essas possibilidades.`;
     return 'Esta pista compara respostas diferentes entre as fichas mais plausíveis.';
   }, [game, choice]);
-  const bookChoice = useMemo(() => choose(book, targets, questions), [book]);
+  const bookChoice = useMemo(() => publishedChoice(book, targets, questions), [book]);
   const bookDist = useMemo(() => posterior(book, targets, questions), [book]);
   const caseFile = useMemo(() => {
     if (!game || game.status === 'playing') return [];
@@ -826,7 +832,7 @@ export default function App() {
       )}
       {page === 'book' && (
         <section className="screen content-screen">
-          <span className="eyebrow gold">LIVRO MESTRE · ÁRVORE EXPERIMENTAL</span>
+          <span className="eyebrow gold">LIVRO MESTRE · ESTRATÉGIA {strategyVersion}</span>
           <h1>Aprenda o próximo passo.</h1>
           <p className="lead">
             Navegue pela estratégia derivada desta base. Cada ramo recalcula a melhor pergunta.
@@ -904,22 +910,107 @@ export default function App() {
       )}
       {page === 'lab' && (
         <section className="screen content-screen">
-          <span className="eyebrow gold">LABORATÓRIO · SIMULAÇÃO LOCAL</span>
-          <h1>Teste a estratégia.</h1>
+          <span className="eyebrow gold">LABORATÓRIO AUTÔNOMO · RELATÓRIO VERSIONADO</span>
+          <h1>A inteligência em teste.</h1>
           <p className="lead">
-            Compare um roteiro fixo com a escolha adaptativa sobre os mesmos alvos e respostas perfeitas.
+            Simulações rodam fora do celular. Só uma estratégia revisada entra no jogo e no Livro Mestre.
+          </p>
+          <div className="lab-discovery">
+            <span className="eyebrow">
+              ABERTURA CANDIDATA · {labReport.approved ? 'ELEGÍVEL À REVISÃO' : 'NÃO APROVADA'}
+            </span>
+            <h2>{questions.find((q) => q.id === labReport.opening.first)?.text}</h2>
+            <p>
+              Selecionada entre {labReport.alternatives.length} abertura(s) na validação. No holdout:{' '}
+              <b>
+                {labReport.holdout[0].overall.wins}/{labReport.holdout[0].overall.games}
+              </b>{' '}
+              contra{' '}
+              <b>
+                {labReport.baseline.overall.wins}/{labReport.baseline.overall.games}
+              </b>{' '}
+              da estratégia atual.
+            </p>
+            {labReport.alternatives.filter(
+              (a) => a.validation.within20 === labReport.alternatives[0].validation.within20,
+            ).length > 1 && (
+              <p>Houve empate na validação; ainda não existe primeira pergunta superior comprovada.</p>
+            )}
+            <div className="lab-branches" role="group" aria-label="Resposta para a primeira pergunta">
+              {answers.map((option) => (
+                <button
+                  key={option.value}
+                  className={labBranch === option.value ? 'active' : ''}
+                  aria-pressed={labBranch === option.value}
+                  onClick={() => setLabBranch(option.value)}
+                >
+                  {option.icon} {option.label}
+                </button>
+              ))}
+            </div>
+            <div className="lab-followup">
+              <small>
+                PRÓXIMA PERGUNTA · RAMO {answers.find((a) => a.value === labBranch)?.label.toUpperCase()}
+              </small>
+              <strong>
+                {questions.find(
+                  (q) => q.id === labReport.opening.branches.find((b) => b.answer === labBranch)?.next,
+                )?.text ?? 'Sem divisão confiável nesta base'}
+              </strong>
+              <div className="lab-branches" role="group" aria-label="Resposta para a segunda pergunta">
+                {answers.map((option) => (
+                  <button
+                    key={option.value}
+                    className={labSecond === option.value ? 'active' : ''}
+                    aria-pressed={labSecond === option.value}
+                    onClick={() => setLabSecond(option.value)}
+                  >
+                    {option.icon} {option.label}
+                  </button>
+                ))}
+              </div>
+              <span>
+                Terceira após {answers.find((a) => a.value === labSecond)?.label}:{' '}
+                {questions.find(
+                  (q) =>
+                    q.id ===
+                    labReport.opening.branches.find((b) => b.answer === labBranch)?.thirdByAnswer[labSecond],
+                )?.text ?? 'a investigar'}
+              </span>
+            </div>
+          </div>
+          <div className="lab-metrics">
+            <div>
+              <b>
+                {labReport.baseline.overall.within10}/{labReport.baseline.overall.games}
+              </b>
+              <small>ATUAL ATÉ 10</small>
+            </div>
+            <div>
+              <b>
+                {labReport.holdout[0].overall.within10}/{labReport.holdout[0].overall.games}
+              </b>
+              <small>CANDIDATA ATÉ 10</small>
+            </div>
+            <div>
+              <b>{labReport.indistinguishable.length}</b>
+              <small>GRUPOS SEM DISTINÇÃO</small>
+            </div>
+          </div>
+          <p className="subtle">
+            {labReport.reason} Estratégia em jogo: {strategyVersion}.
           </p>
           <div className="lab-intro">
             <span className="lab-symbol">◈</span>
             <div>
-              <b>Experimento reproduzível</b>
+              <b>Simulação local curta</b>
               <small>
                 {targets.length} alvos · {questions.length} perguntas · amostra determinística de 12
               </small>
             </div>
           </div>
           <button className="primary-button" disabled={benchmarkBusy} onClick={runBenchmark}>
-            {benchmarkBusy ? 'CALCULANDO…' : benchmarks ? 'REPETIR SIMULAÇÃO ↗' : 'EXECUTAR SIMULAÇÃO ↗'}
+            {benchmarkBusy ? 'CALCULANDO…' : benchmarks ? 'REPETIR TESTE LOCAL ↗' : 'SIMULAR AGORA ↗'}
           </button>
           {benchmarks && (
             <div className="bench-table" role="region" aria-label="Resultados da simulação">
@@ -951,7 +1042,7 @@ export default function App() {
             </p>
           )}
           <div className="lab-notes">
-            <h2>Como ler estes números</h2>
+            <h2>O que esses números medem</h2>
             <p>
               Os alvos vêm da própria base. O simulador não representa escolhas reais de brasileiros, erros
               humanos ou casos fora da base. O roteiro fixo usa as 18 primeiras perguntas cadastradas; ambos

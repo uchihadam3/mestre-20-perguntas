@@ -1,0 +1,1657 @@
+{
+  "schema": 1,
+  "catalog": {
+    "targets": 203,
+    "questions": 65,
+    "fingerprint": "b666a07c"
+  },
+  "config": {
+    "seed": 20261015,
+    "trials": 5,
+    "maxMs": 900000
+  },
+  "cohorts": {
+    "train": 134,
+    "validation": 37,
+    "holdout": 32
+  },
+  "baseline": {
+    "policy": "current",
+    "overall": {
+      "games": 640,
+      "wins": 0,
+      "within5": 0,
+      "within10": 0,
+      "within15": 0,
+      "within20": 0,
+      "meanActions": 17.6203125,
+      "medianActions": 18,
+      "p90Actions": 20,
+      "falseGuesses": 0,
+      "wasted": 0,
+      "weak": 1900,
+      "conflicts": 0,
+      "stopped": 362
+    },
+    "scenarios": {
+      "known": {
+        "games": 160,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 16.84375,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 525,
+        "conflicts": 0,
+        "stopped": 110
+      },
+      "uncertain": {
+        "games": 160,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 18.46875,
+        "medianActions": 20,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 478,
+        "conflicts": 0,
+        "stopped": 67
+      },
+      "noisy": {
+        "games": 160,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 17.825,
+        "medianActions": 20,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 417,
+        "conflicts": 0,
+        "stopped": 75
+      },
+      "outside": {
+        "games": 160,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 17.34375,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 480,
+        "conflicts": 0,
+        "stopped": 110
+      }
+    },
+    "regions": {
+      "Brasil": {
+        "games": 140,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 18.90714285714286,
+        "medianActions": 20,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 493,
+        "conflicts": 0,
+        "stopped": 50
+      },
+      "mundo": {
+        "games": 220,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 15.60909090909091,
+        "medianActions": 16,
+        "p90Actions": 18,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 330,
+        "conflicts": 0,
+        "stopped": 203
+      },
+      "EUA": {
+        "games": 280,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 18.557142857142857,
+        "medianActions": 20,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 1077,
+        "conflicts": 0,
+        "stopped": 109
+      }
+    },
+    "fame": {
+      "1": {
+        "games": 320,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 17.346875,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 928,
+        "conflicts": 0,
+        "stopped": 198
+      },
+      "2": {
+        "games": 320,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 17.89375,
+        "medianActions": 19,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 972,
+        "conflicts": 0,
+        "stopped": 164
+      }
+    },
+    "elapsedMs": 263545
+  },
+  "candidates": [
+    {
+      "policy": "planned",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.405405405405407,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 118,
+        "conflicts": 0,
+        "stopped": 20
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.405405405405407,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 118,
+          "conflicts": 0,
+          "stopped": 20
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.333333333333332,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 35,
+          "conflicts": 0,
+          "stopped": 2
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 13,
+          "medianActions": 14,
+          "p90Actions": 14,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 15,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 17.875,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 68,
+          "conflicts": 0,
+          "stopped": 6
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.666666666666666,
+          "medianActions": 14,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 57,
+          "conflicts": 0,
+          "stopped": 11
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.105263157894736,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 61,
+          "conflicts": 0,
+          "stopped": 9
+        }
+      },
+      "elapsedMs": 15495
+    },
+    {
+      "policy": "planned",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.405405405405407,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 111,
+        "conflicts": 0,
+        "stopped": 19
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.405405405405407,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 111,
+          "conflicts": 0,
+          "stopped": 19
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.333333333333332,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 28,
+          "conflicts": 0,
+          "stopped": 1
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 13,
+          "medianActions": 14,
+          "p90Actions": 15,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 15,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 17.875,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 68,
+          "conflicts": 0,
+          "stopped": 6
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.722222222222221,
+          "medianActions": 15,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 56,
+          "conflicts": 0,
+          "stopped": 10
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.05263157894737,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 55,
+          "conflicts": 0,
+          "stopped": 9
+        }
+      },
+      "elapsedMs": 13688
+    },
+    {
+      "policy": "planned",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.594594594594593,
+        "medianActions": 18,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 117,
+        "conflicts": 0,
+        "stopped": 19
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.594594594594593,
+          "medianActions": 18,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 117,
+          "conflicts": 0,
+          "stopped": 19
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.11111111111111,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 35,
+          "conflicts": 0,
+          "stopped": 2
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 13.166666666666666,
+          "medianActions": 15,
+          "p90Actions": 15,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 15,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 18.3125,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 67,
+          "conflicts": 0,
+          "stopped": 5
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.944444444444445,
+          "medianActions": 15,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 56,
+          "conflicts": 0,
+          "stopped": 11
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.210526315789473,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 61,
+          "conflicts": 0,
+          "stopped": 8
+        }
+      },
+      "elapsedMs": 11063
+    }
+  ],
+  "strategies": [
+    {
+      "policy": "fixed",
+      "overall": {
+        "games": 37,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 7.324324324324325,
+        "medianActions": 7,
+        "p90Actions": 8,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 5,
+        "conflicts": 0,
+        "stopped": 37
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 7.324324324324325,
+          "medianActions": 7,
+          "p90Actions": 8,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 5,
+          "conflicts": 0,
+          "stopped": 37
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 6.555555555555555,
+          "medianActions": 7,
+          "p90Actions": 7,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 0,
+          "conflicts": 0,
+          "stopped": 9
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 7.416666666666667,
+          "medianActions": 7,
+          "p90Actions": 8,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 0,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 7.6875,
+          "medianActions": 7,
+          "p90Actions": 9,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 5,
+          "conflicts": 0,
+          "stopped": 16
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 7.5,
+          "medianActions": 7,
+          "p90Actions": 9,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 3,
+          "conflicts": 0,
+          "stopped": 18
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 7.157894736842105,
+          "medianActions": 7,
+          "p90Actions": 8,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 2,
+          "conflicts": 0,
+          "stopped": 19
+        }
+      },
+      "elapsedMs": 464
+    },
+    {
+      "policy": "split",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.18918918918919,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 111,
+        "conflicts": 0,
+        "stopped": 20
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.18918918918919,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 111,
+          "conflicts": 0,
+          "stopped": 20
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 33,
+          "conflicts": 0,
+          "stopped": 2
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 12.666666666666666,
+          "medianActions": 11,
+          "p90Actions": 14,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 11,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 17.8125,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 67,
+          "conflicts": 0,
+          "stopped": 6
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.222222222222221,
+          "medianActions": 14,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 50,
+          "conflicts": 0,
+          "stopped": 11
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.105263157894736,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 61,
+          "conflicts": 0,
+          "stopped": 9
+        }
+      },
+      "elapsedMs": 9401
+    },
+    {
+      "policy": "current",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.405405405405407,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 118,
+        "conflicts": 0,
+        "stopped": 20
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.405405405405407,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 118,
+          "conflicts": 0,
+          "stopped": 20
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.333333333333332,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 35,
+          "conflicts": 0,
+          "stopped": 2
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 13,
+          "medianActions": 14,
+          "p90Actions": 14,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 15,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 17.875,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 68,
+          "conflicts": 0,
+          "stopped": 6
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.666666666666666,
+          "medianActions": 14,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 57,
+          "conflicts": 0,
+          "stopped": 11
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.105263157894736,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 61,
+          "conflicts": 0,
+          "stopped": 9
+        }
+      },
+      "elapsedMs": 11965
+    },
+    {
+      "policy": "lookahead",
+      "overall": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.45945945945946,
+        "medianActions": 18,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 121,
+        "conflicts": 0,
+        "stopped": 20
+      },
+      "scenarios": {
+        "known": {
+          "games": 37,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 16.45945945945946,
+          "medianActions": 18,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 121,
+          "conflicts": 0,
+          "stopped": 20
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 9,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.333333333333332,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 35,
+          "conflicts": 0,
+          "stopped": 2
+        },
+        "mundo": {
+          "games": 12,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 13,
+          "medianActions": 14,
+          "p90Actions": 14,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 15,
+          "conflicts": 0,
+          "stopped": 12
+        },
+        "EUA": {
+          "games": 16,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 18,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 71,
+          "conflicts": 0,
+          "stopped": 6
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 18,
+          "wins": 2,
+          "within5": 0,
+          "within10": 0,
+          "within15": 2,
+          "within20": 2,
+          "meanActions": 15.722222222222221,
+          "medianActions": 14,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 59,
+          "conflicts": 0,
+          "stopped": 11
+        },
+        "2": {
+          "games": 19,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.157894736842106,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 62,
+          "conflicts": 0,
+          "stopped": 9
+        }
+      },
+      "elapsedMs": 21806
+    }
+  ],
+  "holdout": [
+    {
+      "policy": "planned",
+      "overall": {
+        "games": 640,
+        "wins": 0,
+        "within5": 0,
+        "within10": 0,
+        "within15": 0,
+        "within20": 0,
+        "meanActions": 17.6203125,
+        "medianActions": 18,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 1900,
+        "conflicts": 0,
+        "stopped": 362
+      },
+      "scenarios": {
+        "known": {
+          "games": 160,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 16.84375,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 525,
+          "conflicts": 0,
+          "stopped": 110
+        },
+        "uncertain": {
+          "games": 160,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.46875,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 478,
+          "conflicts": 0,
+          "stopped": 67
+        },
+        "noisy": {
+          "games": 160,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.825,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 417,
+          "conflicts": 0,
+          "stopped": 75
+        },
+        "outside": {
+          "games": 160,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.34375,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 480,
+          "conflicts": 0,
+          "stopped": 110
+        }
+      },
+      "regions": {
+        "Brasil": {
+          "games": 140,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.90714285714286,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 493,
+          "conflicts": 0,
+          "stopped": 50
+        },
+        "mundo": {
+          "games": 220,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 15.60909090909091,
+          "medianActions": 16,
+          "p90Actions": 18,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 330,
+          "conflicts": 0,
+          "stopped": 203
+        },
+        "EUA": {
+          "games": 280,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 18.557142857142857,
+          "medianActions": 20,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 1077,
+          "conflicts": 0,
+          "stopped": 109
+        }
+      },
+      "fame": {
+        "1": {
+          "games": 320,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.346875,
+          "medianActions": 17,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 928,
+          "conflicts": 0,
+          "stopped": 198
+        },
+        "2": {
+          "games": 320,
+          "wins": 0,
+          "within5": 0,
+          "within10": 0,
+          "within15": 0,
+          "within20": 0,
+          "meanActions": 17.89375,
+          "medianActions": 19,
+          "p90Actions": 20,
+          "falseGuesses": 0,
+          "wasted": 0,
+          "weak": 972,
+          "conflicts": 0,
+          "stopped": 164
+        }
+      },
+      "elapsedMs": 268865
+    }
+  ],
+  "opening": {
+    "first": "real",
+    "branches": [
+      {
+        "answer": "yes",
+        "next": "br",
+        "thirdByAnswer": {
+          "yes": "sport",
+          "no": "us",
+          "maybe": "us",
+          "dont_know": "us"
+        },
+        "mass": 0.552693121037386
+      },
+      {
+        "answer": "no",
+        "next": "us",
+        "thirdByAnswer": {
+          "yes": "cartoon",
+          "no": "br",
+          "maybe": "cartoon",
+          "dont_know": "br"
+        },
+        "mass": 0.44730687896261445
+      },
+      {
+        "answer": "maybe",
+        "next": "br",
+        "thirdByAnswer": {
+          "yes": "music",
+          "no": "fictional",
+          "maybe": "us",
+          "dont_know": "us"
+        },
+        "mass": 0
+      },
+      {
+        "answer": "dont_know",
+        "next": "fictional",
+        "thirdByAnswer": {
+          "yes": "us",
+          "no": "br",
+          "maybe": "us",
+          "dont_know": "br"
+        },
+        "mass": 0
+      }
+    ]
+  },
+  "alternatives": [
+    {
+      "first": "real",
+      "validation": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.405405405405407,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 118,
+        "conflicts": 0,
+        "stopped": 20
+      }
+    },
+    {
+      "first": "fictional",
+      "validation": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.405405405405407,
+        "medianActions": 17,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 111,
+        "conflicts": 0,
+        "stopped": 19
+      }
+    },
+    {
+      "first": "br",
+      "validation": {
+        "games": 37,
+        "wins": 2,
+        "within5": 0,
+        "within10": 0,
+        "within15": 2,
+        "within20": 2,
+        "meanActions": 16.594594594594593,
+        "medianActions": 18,
+        "p90Actions": 20,
+        "falseGuesses": 0,
+        "wasted": 0,
+        "weak": 117,
+        "conflicts": 0,
+        "stopped": 19
+      }
+    }
+  ],
+  "approved": false,
+  "reason": "Sem ganho robusto em holdout; manter a política publicada até curadoria e nova validação.",
+  "indistinguishable": [
+    {
+      "names": [
+        "Leonardo DiCaprio",
+        "Brad Pitt",
+        "Johnny Depp",
+        "Morgan Freeman",
+        "Samuel L. Jackson",
+        "Adam Sandler"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar filmografia, prêmios e papéis em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Madonna",
+        "Taylor Swift",
+        "Beyoncé",
+        "Ariana Grande"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Homem-Aranha",
+        "Hulk",
+        "Thor",
+        "Wolverine"
+      ],
+      "knownQuestions": 13,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Roberto Carlos (cantor)",
+        "Caetano Veloso",
+        "Gilberto Gil"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Nelson Mandela",
+        "Cleópatra",
+        "Napoleão Bonaparte"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Homem de Ferro",
+        "Capitão América",
+        "Pantera Negra"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Mario",
+        "Luigi",
+        "Princesa Peach"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "The Beatles",
+        "Queen",
+        "Coldplay"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "BTS",
+        "BLACKPINK",
+        "U2"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Legião Urbana",
+        "Racionais MC's",
+        "Titãs"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Ronaldo Fenômeno",
+        "Ronaldinho Gaúcho"
+      ],
+      "knownQuestions": 13,
+      "research": "Pesquisar clube, modalidade, época e títulos em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Romário",
+        "Kaká"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar clube, modalidade, época e títulos em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Zico",
+        "Roberto Carlos (jogador)"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar clube, modalidade, época e títulos em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Lionel Messi",
+        "Cristiano Ronaldo"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar clube, modalidade, época e títulos em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Michael Jackson",
+        "Elvis Presley"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Eminem",
+        "Bruno Mars"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Rihanna",
+        "Shakira"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Bad Bunny",
+        "PSY"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Anitta",
+        "Ivete Sangalo"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Gusttavo Lima",
+        "Luan Santana"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Rita Lee",
+        "Elis Regina"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Freddie Mercury",
+        "John Lennon"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Keanu Reeves",
+        "Jim Carrey"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar filmografia, prêmios e papéis em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Fernanda Montenegro",
+        "Glória Pires"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar filmografia, prêmios e papéis em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Tony Ramos",
+        "Lázaro Ramos"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar filmografia, prêmios e papéis em fontes oficiais antes de criar perguntas."
+    },
+    {
+      "names": [
+        "Faustão",
+        "Ratinho"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Lula",
+        "Jair Bolsonaro"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Isaac Newton",
+        "Stephen Hawking"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar biografia, período e obra em fontes primárias antes de cadastrar uma pista."
+    },
+    {
+      "names": [
+        "Pato Donald",
+        "Pateta"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Patrick Estrela",
+        "Lula Molusco"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Tom (Tom e Jerry)",
+        "Jerry (Tom e Jerry)"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Scooby-Doo",
+        "Pica-Pau"
+      ],
+      "knownQuestions": 11,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Woody (Toy Story)",
+        "Buzz Lightyear"
+      ],
+      "knownQuestions": 13,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Luke Skywalker",
+        "Yoda"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Harry Potter",
+        "Rony Weasley"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Frodo Bolseiro",
+        "Gandalf"
+      ],
+      "knownQuestions": 12,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Roronoa Zoro",
+        "Levi Ackerman"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Chaves",
+        "Chapolin Colorado"
+      ],
+      "knownQuestions": 10,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    },
+    {
+      "names": [
+        "Quico",
+        "Dona Florinda"
+      ],
+      "knownQuestions": 9,
+      "research": "Pesquisar obra, papel narrativo e traços exclusivos em fonte oficial; cadastrar Sim e Não com evidências."
+    }
+  ]
+}

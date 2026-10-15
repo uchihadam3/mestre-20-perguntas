@@ -17,4 +17,14 @@ jobs:
       - run: npm run format:check
       - run: npm run validate:data
       - run: npm test
+      - run: npm run lab:ci -- --gate=reports/regression.json
       - run: npm run build
+      - name: Relatório de inteligência
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laboratorio-pr
+          path: |
+            reports/ci.json
+            reports/ci.md
+          if-no-files-found: ignore
