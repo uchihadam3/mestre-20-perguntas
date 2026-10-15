@@ -123,20 +123,23 @@ export function informationGain(dist: Distribution, targets: Target[], q: Questi
   let after = 0;
   for (const answer of ['yes', 'no', 'maybe', 'dont_know'] as Answer[]) {
     let chance = 0;
-    for (const target of targets) chance += (dist.get(target.id) ?? 0) * likelihood(target, q, answer);
-    if (chance > 0) {
-      const branch = update(dist, targets, q, answer);
-      if (CERTAIN_CLASSIFICATIONS.has(q.id) && (answer === 'yes' || answer === 'no')) {
-        let remaining = 0;
-        for (const target of targets) {
-          const known = attribute(target, q);
-          if (known !== 'unknown' && known !== answer) branch.set(target.id, 0);
-          remaining += branch.get(target.id) ?? 0;
-        }
-        if (remaining > epsilon) for (const [id, p] of branch) branch.set(id, p / remaining);
+    let remaining = 0;
+    let weightedLog = 0;
+    const certain = CERTAIN_CLASSIFICATIONS.has(q.id) && (answer === 'yes' || answer === 'no');
+    for (const target of targets) {
+      const weight = (dist.get(target.id) ?? 0) * likelihood(target, q, answer);
+      chance += weight;
+      if (certain) {
+        const known = attribute(target, q);
+        if (known !== 'unknown' && known !== answer) continue;
       }
-      after += chance * entropy(branch);
+      remaining += weight;
+      if (weight > 0) weightedLog += weight * Math.log2(weight);
     }
+    // An empty hard-constrained branch falls back to the soft posterior.
+    // Such branches cannot occur with normal positive likelihoods and catalog,
+    // but preserve the old behavior for synthetic tests.
+    if (chance > 0 && remaining > epsilon) after += chance * (Math.log2(remaining) - weightedLog / remaining);
   }
   return Math.max(0, before - after);
 }

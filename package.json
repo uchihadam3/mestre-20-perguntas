@@ -12,7 +12,9 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "validate:data": "node --import tsx scripts/validate-data.ts",
-    "benchmark": "node --import tsx scripts/benchmark.ts"
+    "benchmark": "node --import tsx scripts/benchmark.ts",
+    "lab:ci": "node --import tsx scripts/autonomous-lab.ts --ci --output=reports/ci",
+    "lab:nightly": "node --import tsx scripts/autonomous-lab.ts --output=reports/nightly"
   },
   "dependencies": {
     "react": "^19.2.0",
